@@ -9,6 +9,8 @@ const {
   ButtonBuilder,
   ButtonStyle,
 } = require("discord.js");
+const fs = require("fs");
+const path = require("path");
 
 const client = new Client({
   intents: [
@@ -18,11 +20,27 @@ const client = new Client({
     IntentsBitField.Flags.MessageContent,
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildMembers,
   ],
 });
-const allCommands = require("./commands");
+const allCommands = require("./commands/commands");
+client.commands = new Map();
 
 const commandsPerPage = 5;
+
+// Mod file integration
+
+const moderationFile = fs.readdirSync(path.join(__dirname, "mod"));
+for (const folder of moderationFile) {
+  const commandFile = fs
+    .readdirSync(path.join(__dirname, "mod", folder))
+    .filter((file) => file.endsWith(".js"));
+  for (const file of commandFile) {
+    const command = require(path.join(__dirname, "mod", folder, file));
+    client.commands.set(command.name, command);
+  }
+}
 
 client.on("messageCreate", (message) => {
   if (message.author.bot) return;
@@ -287,7 +305,7 @@ client.on("interactionCreate", async (interaction) => {
           allow: [PermissionsBitField.Flags.ViewChannel],
         },
       ]);
-      await interaction.reply(`Your channel *${channel.name}* is now private.`);
+      await interaction.reply(`Your channel *${channel.name}* is now public.`);
     } else {
       await interaction.reply(
         "You don't have permission to change the channel settings."
