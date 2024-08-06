@@ -8,6 +8,7 @@ const {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
+  Collection,
 } = require("discord.js");
 const fs = require("fs");
 const path = require("path");
@@ -29,17 +30,13 @@ client.commands = new Map();
 
 const commandsPerPage = 5;
 
-// Mod file integration
-
-const moderationFile = fs.readdirSync(path.join(__dirname, "mod"));
-for (const folder of moderationFile) {
-  const commandFile = fs
-    .readdirSync(path.join(__dirname, "mod", folder))
+const functionFolder = fs.readdirSync(`./src/functions`);
+for (const folder of functionFolder) {
+  const functionFiles = fs
+    .readdirSync(`./src/functions/${folder}`)
     .filter((file) => file.endsWith(".js"));
-  for (const file of commandFile) {
-    const command = require(path.join(__dirname, "mod", folder, file));
-    client.commands.set(command.name, command);
-  }
+  for (const file of functionFiles)
+    require(`./functions/${folder}/${file}`), client;
 }
 
 client.on("messageCreate", (message) => {
