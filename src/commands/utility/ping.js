@@ -1,5 +1,4 @@
-const { SlashCommandBuilder } = require("discord.js");
-const { execute } = require("../../mod/moderation/ban");
+const { SlashCommandBuilder, Co } = require("discord.js");
 
 module.exports = {
   data: new SlashCommandBuilder()
