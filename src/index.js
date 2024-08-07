@@ -9,9 +9,10 @@ const {
   ButtonBuilder,
   ButtonStyle,
   Collection,
+  Events,
 } = require("discord.js");
 const fs = require("fs");
-const path = require("path");
+const path = require("node:path");
 
 const client = new Client({
   intents: [
@@ -25,18 +26,30 @@ const client = new Client({
     GatewayIntentBits.GuildMembers,
   ],
 });
-const allCommands = require("./commands/commands");
-client.commands = new Map();
+const allCommands = require("./data/commands");
 
+client.commands = new Collection();
 const commandsPerPage = 5;
 
-const functionFolder = fs.readdirSync(`./src/functions`);
-for (const folder of functionFolder) {
-  const functionFiles = fs
-    .readdirSync(`./src/functions/${folder}`)
+const folderPath = path.join(__dirname, "commands");
+const commandFolder = fs.readdirSync(folderPath);
+
+for (const folder of commandFolder) {
+  const commandPath = path.join(folderPath, folder);
+  const commandFiles = fs
+    .readdirSync(commandPath)
     .filter((file) => file.endsWith(".js"));
-  for (const file of functionFiles)
-    require(`./functions/${folder}/${file}`), client;
+  for (const file of commandFiles) {
+    const filePath = path.join(commandPath, file);
+    const command = require(filePath);
+    if ("data" in command && "execute" in command) {
+      client.commands.set(command.data.name, command);
+    } else {
+      console.log(
+        `[WARNING] The command at ${filePath} is missing a require "data" or "execute" property.`
+      );
+    }
+  }
 }
 
 client.on("messageCreate", (message) => {
@@ -307,6 +320,37 @@ client.on("interactionCreate", async (interaction) => {
       await interaction.reply(
         "You don't have permission to change the channel settings."
       );
+    }
+  }
+});
+
+client.once(Events.ClientReady, (readyClient) => {
+  console.log(`Ready! Logged in as ${readyClient.user.tag}`);
+});
+
+client.on(Events.InteractionCreate, async (interaction) => {
+  if (!interaction.isChatInputCommand()) return;
+  const command = interaction.client.commands.get(interaction.commandName);
+
+  if (!command) {
+    console.error(`No command matching ${interaction.commandName} was found.`);
+    return;
+  }
+
+  try {
+    await command.execute(interaction);
+  } catch (error) {
+    console.error(error);
+    if (interaction.replied || interaction.deferred) {
+      await interaction.followUp({
+        content: "There was an error while executing this command!",
+        ephemeral: true,
+      });
+    } else {
+      await interaction.reply({
+        content: "There was an error while executing this command!",
+        ephemeral: true,
+      });
     }
   }
 });
