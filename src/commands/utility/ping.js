@@ -1,10 +1,19 @@
-const { SlashCommandBuilder, Co } = require("discord.js");
+const {
+  SlashCommandBuilder,
+  Client,
+  GatewayIntentBits,
+} = require("discord.js");
 
 module.exports = {
+  cooldown: 10,
   data: new SlashCommandBuilder()
     .setName("ping")
     .setDescription("Show the user ping"),
   async execute(interaction) {
-    await interaction.reply("pong!");
+    const client = interaction.client;
+    await interaction.reply({
+      content: `${client.ws.ping} ms`,
+      ephemeral: true,
+    });
   },
 };
