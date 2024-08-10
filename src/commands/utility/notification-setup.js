@@ -94,9 +94,15 @@ module.exports = {
             .setColor("Red")
             .setTitle(`✅ YouTube channel Configuration Success`)
             .setDescription(
-              `${tragetChannel} will now get notified whenever there's a new upload by ${channelName}`
+              `${tragetChannel} will now get notified whenever there's a new upload by ${channelName}.`
             )
-            .setTimestamp();
+            .setTimestamp()
+            .setFooter({
+              text: `Added by ${interaction.user.tag}`,
+              iconURL: `${interaction.user.displayAvatarURL({
+                dynamic: true,
+              })}`,
+            });
 
           interaction.followUp({ embeds: [embed] });
         })

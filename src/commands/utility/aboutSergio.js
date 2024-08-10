@@ -57,7 +57,14 @@ module.exports = {
       )
       .setThumbnail(
         "https://cdn.discordapp.com/attachments/1250377756370534432/1269354972668104747/sergioLogo.jpeg?ex=66b659f0&is=66b50870&hm=6a4acb544ce0962244f8ad22e5d88673688d3576c5693d7998925fc5b735e387&"
-      );
-    await interaction.deferReply({ embeds: [embed] });
+      )
+      .setTimestamp()
+      .setFooter({
+        text: `Requested by ${interaction.user.tag}`,
+        iconURL: `${interaction.user.displayAvatarURL({
+          dynamic: true,
+        })}`,
+      });
+    await interaction.reply({ embeds: [embed] });
   },
 };
