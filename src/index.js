@@ -13,6 +13,8 @@ const {
 } = require("discord.js");
 const fs = require("fs");
 const path = require("node:path");
+const mongoose = require("mongoose");
+const { MongoClient, ServerApiVersion } = require("mongodb");
 
 const client = new Client({
   intents: [
@@ -340,8 +342,11 @@ client.on("interactionCreate", async (interaction) => {
   }
 });
 
-client.on("ready", (c) => {
-  console.log(`🟢 ${c.user.tag} is now ready`);
-});
+mongoose.connect(process.env.MONGODB_URI).then(() => {
+  console.log("Connected to DB");
 
-client.login(process.env.TOKEN);
+  client.on("ready", (c) => {
+    console.log(`🟢 ${c.user.tag} is now ready`);
+  });
+  client.login(process.env.TOKEN);
+});
