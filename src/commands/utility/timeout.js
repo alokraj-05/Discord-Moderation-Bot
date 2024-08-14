@@ -21,6 +21,7 @@ module.exports = {
   async execute(interaction) {
     const user = interaction.options.getUser("user");
     const duration = interaction.options.getInteger("duration") * 60 * 1000;
+    const member = await interaction.guild.members.fetch(user.id);
 
     if (
       !interaction.guild.members.me.permissions.has(
@@ -49,7 +50,6 @@ module.exports = {
       });
     }
 
-    const member = await interaction.guild.members.fetch(user.id);
     await member.timeout(duration, "Used inappropriate language");
 
     await interaction.reply({
