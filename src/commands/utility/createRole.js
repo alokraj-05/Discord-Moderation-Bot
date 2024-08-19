@@ -23,7 +23,6 @@ module.exports = {
   async execute(interaction) {
     const roleName = interaction.options.getString("rolename");
     const roleColor = interaction.options.getString("set-color");
-    const member = interaction.guild.members.cache.get(user.id);
 
     if (
       !interaction.guild.members.me.permissions.has(
