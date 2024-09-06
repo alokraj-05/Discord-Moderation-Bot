@@ -11,8 +11,16 @@ const commands = [
     description: "Setup youtube notifications for a channel",
   },
   {
-    name: "`/yt-notification-remove`",
-    description: "Remove youtube notifications embed",
+    name: "`/unlock`",
+    description: "unlocks the channel",
+  },
+  {
+    name: "`/server`",
+    description: "Get details about the server",
+  },
+  {
+    name: "`/user`",
+    description: "Get information about user",
   },
 ];
 
