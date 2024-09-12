@@ -1,0 +1,19 @@
+.env requirements VARIABLES (make sure to make these variables in your env file to make the bot work without error)
+<-- env start -->
+TOKEN = YOUR-BOT-TOKEN
+BOT_OWNER_ID = BOT-OWNER-ID 
+DEFAULT_PREFIX = SET A CUSTOM DEFAULT_PREFIX
+MONGODB_URI = MONGODB-URI (which your get there only after creating a db)
+<-- env end -->
+
+
+
+
+
+<-- modules start -->
+
+"I am directly proving commands just copy paste it"
+
+npm i -g discord.js dotenv fs mongoose rss-parser
+
+<-- modules end -->
