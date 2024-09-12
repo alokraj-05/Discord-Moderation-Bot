@@ -14,7 +14,6 @@ const {
 const fs = require("fs");
 const path = require("node:path");
 const mongoose = require("mongoose");
-const { MongoClient, ServerApiVersion } = require("mongodb");
 
 const client = new Client({
   intents: [
@@ -28,38 +27,20 @@ const client = new Client({
     GatewayIntentBits.GuildMembers,
   ],
 });
-const allCommands = require("./data/commands");
+const BOT_OWNER_ID = process.env.BOT_OWNER_ID;
 
+const allCommands = require("./data/commands");
 client.commands = new Collection();
 client.cooldowns = new Collection();
-const commandsPerPage = 5;
 
-const folderPath = path.join(__dirname, "commands");
-const commandFolder = fs.readdirSync(folderPath);
-
-for (const folder of commandFolder) {
-  const commandPath = path.join(folderPath, folder);
-  const commandFiles = fs
-    .readdirSync(commandPath)
-    .filter((file) => file.endsWith(".js"));
-  for (const file of commandFiles) {
-    const filePath = path.join(commandPath, file);
-    const command = require(filePath);
-    if ("data" in command && "execute" in command) {
-      client.commands.set(command.data.name, command);
-    } else {
-      console.log(
-        `[WARNING] The command at ${filePath} is missing a require "data" or "execute" property.`
-      );
-    }
-  }
-}
+const commandsPerPage = 7;
+require("./handlers/prefixCommandHandler")(client);
+require("./handlers/slashCommandHandler")(client);
 
 const eventsPath = path.join(__dirname, "events");
 const eventFiles = fs
   .readdirSync(eventsPath)
   .filter((file) => file.endsWith(".js"));
-
 for (const file of eventFiles) {
   const filePath = path.join(eventsPath, file);
   const event = require(filePath);
@@ -70,13 +51,7 @@ for (const file of eventFiles) {
   }
 }
 
-client.on("messageCreate", (message) => {
-  if (message.author.bot) return;
-
-  if (message.content === "hello") {
-    message.reply(`Hi I am here to assist you`);
-  }
-});
+// Help command
 function generateEmbed(page) {
   const start = page * commandsPerPage;
   const currentCommands = allCommands.slice(start, start + commandsPerPage);
@@ -102,8 +77,6 @@ function generateEmbed(page) {
 
   return embed;
 }
-
-// Help command
 
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isChatInputCommand() && !interaction.isButton()) return;
@@ -158,6 +131,57 @@ client.on("interactionCreate", async (interaction) => {
 });
 
 // Other commands
+client.on("messageCreate", (message) => {
+  if (message.author.bot) return;
+
+  if (message.content === "nashe") {
+    message.reply("KAR-LO");
+  }
+});
+
+// welcome message
+
+const GuildSettings = require("../src/models/guildSettings");
+
+client.on("guildMemberAdd", async (member) => {
+  const guildId = member.guild.id;
+
+  try {
+    const settings = await GuildSettings.findOne({ guildId });
+
+    if (!settings || !settings.welcomeChannelId) return;
+
+    const channel = member.guild.channels.cache.get(settings.welcomeChannelId);
+    if (!channel) return;
+
+    const rulesChannel =
+      member.guild.channels.cache.find((ch) => ch.name.includes("rules")) ||
+      "rules channel";
+    const rolesChannel =
+      member.guild.channels.cache.find((ch) =>
+        ch.name.includes("self-roles")
+      ) || "self roles channel";
+
+    // Create the embed for the welcome message
+    const welcomeEmbed = new EmbedBuilder()
+      .setColor("#0ebcff")
+      .setTitle("Welcome!")
+      .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
+      .setDescription(
+        `Hello **@${member.user.username}** , a.k.a **${member.displayName}**!
+      
+    Welcome to **${member.guild.name}**! We're glad to have you here. 😊
+
+    Make sure to check out ${rulesChannel} to familiarize yourself with the server rules, and visit ${rolesChannel} to assign yourself some roles.`
+      )
+      .setFooter({ text: `We now have ${member.guild.memberCount} members!` })
+      .setTimestamp();
+
+    await channel.send({ embeds: [welcomeEmbed] });
+  } catch (error) {
+    console.error("Error retrieving guild settings:", error);
+  }
+});
 
 client.on("interactionCreate", (interaction) => {
   if (interaction.commandName === "aboutsergio") {
@@ -277,68 +301,6 @@ client.on("messageCreate", (message) => {
         "https://cdn.discordapp.com/attachments/1250377756370534432/1269354972668104747/sergioLogo.jpeg?ex=66afc270&is=66ae70f0&hm=dd8dc2e0530ad18109b79e5a73b2005b44a0b411dc772385a5dca34561e42d00&"
       );
     message.channel.send({ embeds: [embed] });
-  }
-});
-
-//lock COMMAND TO make channel private
-client.on("interactionCreate", async (interaction) => {
-  if (!interaction.isCommand()) return;
-
-  const { commandName, channel, member, guild } = interaction;
-
-  if (commandName === "lock") {
-    if (
-      !guild.members.me.permissions.has(PermissionsBitField.Flags.Administrator)
-    ) {
-      await interaction.reply(
-        "I don't have permission to change the channel settings."
-      );
-      return;
-    }
-    if (member.permissions.has(PermissionsBitField.Flags.ManageChannels)) {
-      await channel.permissionOverwrites.set([
-        {
-          id: interaction.guild.roles.everyone, // Everyone role
-          deny: [PermissionsBitField.Flags.ViewChannel], // Deny sending messages
-        },
-      ]);
-      await interaction.reply(`Your channel ${channel.name} is now private.`);
-    } else {
-      await interaction.reply(
-        "You don't have permission to change the channel settings."
-      );
-    }
-  }
-});
-
-// Unlock "PUBLIC" command
-client.on("interactionCreate", async (interaction) => {
-  if (!interaction.isCommand()) return;
-
-  const { commandName, channel, member, guild } = interaction;
-
-  if (commandName === "unlock") {
-    if (
-      !guild.members.me.permissions.has(PermissionsBitField.Flags.Administrator)
-    ) {
-      await interaction.reply(
-        "I don't have permission to change the channel settings."
-      );
-      return;
-    }
-    if (member.permissions.has(PermissionsBitField.Flags.ManageChannels)) {
-      await channel.permissionOverwrites.set([
-        {
-          id: interaction.guild.roles.everyone, // Everyone role
-          allow: [PermissionsBitField.Flags.ViewChannel],
-        },
-      ]);
-      await interaction.reply(`Your channel *${channel.name}* is now public.`);
-    } else {
-      await interaction.reply(
-        "You don't have permission to change the channel settings."
-      );
-    }
   }
 });
 
