@@ -11,7 +11,6 @@ module.exports = {
     .setName("ping")
     .setDescription("Show the user ping"),
   async execute(interaction) {
-    const client = interaction.client;
     const sentMessage = await interaction.reply({
       content: "Calculating ping...",
       fetchReply: true,
@@ -30,9 +29,5 @@ module.exports = {
       .setTimestamp();
 
     await interaction.editReply({ content: "", embeds: [pingEmbed] });
-    // await interaction.reply({
-    //   content: `${client.ws.ping} ms`,
-    //   ephemeral: true,
-    // });
   },
 };
