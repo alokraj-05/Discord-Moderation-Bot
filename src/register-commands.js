@@ -1,5 +1,12 @@
 require("dotenv").config();
-const { Client, GatewayIntentBits, REST, Routes } = require("discord.js");
+const {
+  Client,
+  GatewayIntentBits,
+  REST,
+  Routes,
+  Collection,
+  Events,
+} = require("discord.js");
 const path = require("path");
 const fs = require("fs");
 
@@ -9,16 +16,8 @@ const client = new Client({
 
 const commands = [
   { name: "help", description: "Provides all the available commands" },
-  { name: "aboutsergio", description: "Know about Sergio" },
-  {
-    name: "lock",
-    description: "Locks the channel and makes it private",
-  },
-  {
-    name: "unlock",
-    description: "Unlocks the channel and makes it public",
-  },
 ];
+// const commandsFolder = fs.readdirSync(folderPath);
 
 const folderPath = path.join(__dirname, "commands");
 const commandsFolder = fs.readdirSync(folderPath);
@@ -40,6 +39,7 @@ for (const folder of commandsFolder) {
     }
   }
 }
+
 const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
 
 (async () => {
