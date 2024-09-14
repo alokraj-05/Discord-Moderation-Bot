@@ -3,7 +3,7 @@ const Status = require("../../models/status");
 require("dotenv").config();
 
 module.exports = {
-  name: "setstatus",
+  name: "cs",
   description: "Set status for the bot",
   async execute(message, args) {
     try {
