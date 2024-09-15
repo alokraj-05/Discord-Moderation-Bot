@@ -1,4 +1,5 @@
-﻿# Discord moderation bot
+﻿# Discord moderation bot ! <a> <img src="https://github.com/user-attachments/assets/061c843c-49c9-4e85-b86e-d5c570562c5f" width="50px" heigh="auto" style="border-radius:50%"> </a>
+
 
 [![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
 
@@ -20,9 +21,14 @@
 
 [-] [Sergio Docs](https://sergio-docs.vercel.app/) Official Docs for the bot
 
-[-] Now you configure your **github** account with slash commands. **_Just with your github *username* and notification channel. {You can also set custom message}_**
-![preview](https://github.com/user-attachments/assets/0e493a9e-19af-4323-bb87-934c724b07fa)
-![message preview](https://github.com/user-attachments/assets/9aa78de3-4373-44b7-82e5-900f4089ddba)
+[-] Now you configure your **github** account with slash commands. **_Just with your github *username* and notification channel. {You can also set custom message}_** Due to github api rate limit per hour, we can only send req in an interval of 5 minutes (we can also send req per minute but if there are so many user then that will lead to bot ban from using the api.
+
+<img src="https://github.com/user-attachments/assets/0e493a9e-19af-4323-bb87-934c724b07fa" width="80%">
+<img src="https://github.com/user-attachments/assets/9aa78de3-4373-44b7-82e5-900f4089ddba" width="30%">
+
+[-] You can also setup youtube like this
+
+<img src="https://github.com/user-attachments/assets/420ebe75-da07-48c3-bdd0-404c9f55ae90" width="80%">
 
 # Clone repo
 
