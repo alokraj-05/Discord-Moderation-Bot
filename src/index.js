@@ -14,7 +14,7 @@ const {
 const fs = require("fs");
 const path = require("node:path");
 const mongoose = require("mongoose");
-
+const mentionResponse = require('./commands/prefix/mentionResponse');
 const client = new Client({
   intents: [
     IntentsBitField.Flags.Guilds,
@@ -22,9 +22,10 @@ const client = new Client({
     IntentsBitField.Flags.GuildMessages,
     IntentsBitField.Flags.MessageContent,
     GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildPresences,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
-    GatewayIntentBits.GuildMembers,
   ],
 });
 const BOT_OWNER_ID = process.env.BOT_OWNER_ID;
@@ -32,6 +33,13 @@ const BOT_OWNER_ID = process.env.BOT_OWNER_ID;
 const allCommands = require("./data/commands");
 client.commands = new Collection();
 client.cooldowns = new Collection();
+const initializeGitHubCheck = require("./events/check-github");
+
+// After your client is ready (usually in a 'ready' event handler):
+client.on("ready", () => {
+  console.log(`Logged in as ${client.user.tag}!`);
+  initializeGitHubCheck(client);
+});
 
 const commandsPerPage = 7;
 require("./handlers/prefixCommandHandler")(client);
@@ -50,7 +58,10 @@ for (const file of eventFiles) {
     client.on(event.name, (...args) => event.execute(...args));
   }
 }
-
+client.on('messageCreate', async (message) => {
+  // Call the mentionResponse module if the message mentions the bot
+  await mentionResponse.execute(message, client);
+});
 // Help command
 function generateEmbed(page) {
   const start = page * commandsPerPage;
@@ -78,57 +89,57 @@ function generateEmbed(page) {
   return embed;
 }
 
-client.on("interactionCreate", async (interaction) => {
-  if (!interaction.isChatInputCommand() && !interaction.isButton()) return;
+// client.on("interactionCreate", async (interaction) => {
+//   if (!interaction.isChatInputCommand() && !interaction.isButton()) return;
 
-  if (interaction.isCommand() && interaction.commandName === "help") {
-    const embed = generateEmbed(0);
-    const row = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setCustomId("prev")
-        .setLabel("⬅️")
-        .setStyle(ButtonStyle.Primary)
-        .setDisabled(true),
-      new ButtonBuilder()
-        .setCustomId("next")
-        .setLabel("➡️")
-        .setStyle(ButtonStyle.Primary)
-        .setDisabled(allCommands.length <= commandsPerPage)
-    );
-    await interaction.reply({ embeds: [embed], components: [row] });
-  } else if (interaction.isButton()) {
-    const page =
-      parseInt(
-        interaction.message.embeds[0].footer.text.match(/Page (\d+) of/)[1],
-        10
-      ) - 1;
+//   if (interaction.isCommand() && interaction.commandName === "help") {
+//     const embed = generateEmbed(0);
+//     const row = new ActionRowBuilder().addComponents(
+//       new ButtonBuilder()
+//         .setCustomId("prev")
+//         .setLabel("⬅️")
+//         .setStyle(ButtonStyle.Primary)
+//         .setDisabled(true),
+//       new ButtonBuilder()
+//         .setCustomId("next")
+//         .setLabel("➡️")
+//         .setStyle(ButtonStyle.Primary)
+//         .setDisabled(allCommands.length <= commandsPerPage)
+//     );
+//     await interaction.reply({ embeds: [embed], components: [row] });
+//   } else if (interaction.isButton()) {
+//     const page =
+//       parseInt(
+//         interaction.message.embeds[0].footer.text.match(/Page (\d+) of/)[1],
+//         10
+//       ) - 1;
 
-    let newPage;
-    if (interaction.customId === "next") {
-      newPage = page + 1;
-    } else if (interaction.customId === "prev") {
-      newPage = page - 1;
-    }
+//     let newPage;
+//     if (interaction.customId === "next") {
+//       newPage = page + 1;
+//     } else if (interaction.customId === "prev") {
+//       newPage = page - 1;
+//     }
 
-    const embed = generateEmbed(newPage);
-    const row = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setCustomId("prev")
-        .setLabel("⬅️")
-        .setStyle(ButtonStyle.Primary)
-        .setDisabled(newPage === 0),
-      new ButtonBuilder()
-        .setCustomId("next")
-        .setLabel("➡️")
-        .setStyle(ButtonStyle.Primary)
-        .setDisabled(
-          newPage === Math.ceil(allCommands.length / commandsPerPage) - 1
-        )
-    );
+//     const embed = generateEmbed(newPage);
+//     const row = new ActionRowBuilder().addComponents(
+//       new ButtonBuilder()
+//         .setCustomId("prev")
+//         .setLabel("⬅️")
+//         .setStyle(ButtonStyle.Primary)
+//         .setDisabled(newPage === 0),
+//       new ButtonBuilder()
+//         .setCustomId("next")
+//         .setLabel("➡️")
+//         .setStyle(ButtonStyle.Primary)
+//         .setDisabled(
+//           newPage === Math.ceil(allCommands.length / commandsPerPage) - 1
+//         )
+//     );
 
-    await interaction.update({ embeds: [embed], components: [row] });
-  }
-});
+//     await interaction.update({ embeds: [embed], components: [row] });
+//   }
+// });
 
 // Other commands
 client.on("messageCreate", (message) => {
@@ -168,13 +179,15 @@ client.on("guildMemberAdd", async (member) => {
       .setTitle("Welcome!")
       .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
       .setDescription(
-        `Hello **@${member.user.username}** , a.k.a **${member.displayName}**!
+        `Hello **__${member.user.username}__** , a.k.a **${member}**!
       
     Welcome to **${member.guild.name}**! We're glad to have you here. 😊
 
     Make sure to check out ${rulesChannel} to familiarize yourself with the server rules, and visit ${rolesChannel} to assign yourself some roles.`
       )
-      .setFooter({ text: `We now have ${member.guild.memberCount} members!` })
+      .setFooter({
+        text: `We now have __${member.guild.memberCount}__ members!`,
+      })
       .setTimestamp();
 
     await channel.send({ embeds: [welcomeEmbed] });
