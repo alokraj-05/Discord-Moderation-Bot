@@ -9,19 +9,20 @@
 
 [-] This is Sergio {The moderation bot}
 
-[-] Easy to use with slash commands
+[-] Easy to use with slash commands, prefix commands
 
-[-] Make your server secure and handle all the raids spams.
+- [ ] Make your server secure and handle all the raids spams.
+> I am currently working on the raid and spam i will be updated soon.
 
 # Nearby Updates
 
-[-] Dashboard integration
+- [ ] Dashboard integration
 
 # latest updates
 
-[-] [Sergio Docs](https://sergio-docs.vercel.app/) Official Docs for the bot
+- [x] [Sergio Docs](https://sergio-docs.vercel.app/) Official Docs for the bot
 
-[-] Now you configure your **github** account with slash commands. **_Just with your github *username* and notification channel. {You can also set custom message}_** Due to github api rate limit per hour, we can only send req in an interval of 5 minutes (we can also send req per minute but if there are so many user then that will lead to bot ban from using the api.
+- [x] Now you configure your **github** account with slash commands. **_Just with your github *username* and notification channel. {You can also set custom message}_** Due to github api rate limit per hour, we can only send req in an interval of 5 minutes (we can also send req per minute but if there are so many user then that will lead to bot ban from using the api.
 
 <img src="https://github.com/user-attachments/assets/0e493a9e-19af-4323-bb87-934c724b07fa" width="80%">
 <img src="https://github.com/user-attachments/assets/9aa78de3-4373-44b7-82e5-900f4089ddba" width="30%">
@@ -86,7 +87,7 @@ npm install rss-parser
 
 ```bash
 npm i axios
-
+```
 **LAST STEP**
 
 - Create a ".env" file in the main file (outside of src file)
