@@ -3,7 +3,7 @@ require("dotenv").config();
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName("aboutme")
+    .setName("about")
     .setDescription("About Sergio"),
   async execute(interaction, client) {
     const embed = new EmbedBuilder()
