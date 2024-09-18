@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
-const githubNotification = require("../../models/gtihubNotifications");
+const githubNotification = require("../../models/githubNotifications");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -148,8 +148,7 @@ module.exports = {
             );
           }
         } else {
-          sendFailMessage(`You can not remove notifications for another user either conatct user or support server.`);
-
+          sendFailMessage(`<:1568midubious:1284932090109886464> You can not remove notifications for another user. If the user no more belong to the server please raise a request on [support server](https://discord.gg/99ugxRgyk5)`);
         }
         break;
       }
