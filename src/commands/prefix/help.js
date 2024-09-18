@@ -3,10 +3,11 @@ const { getPrefix } = require('../../prefix/getPrefix'); // Fetching prefix from
 
 // Sample command modules (you can adjust this as needed)
 const modules = [
-  { name: 'Moderation', commands: ['ban', 'kick', 'mute'] },
-  { name: 'General', commands: ['ping', 'avatar', 'serverinfo'] },
+  { name: 'Moderation', commands: ['ban', 'kick', 'mute(timeout)', 'bannedUser(fb)', 'unban(ub)', 'lock', 'unlock'] },
+  { name: 'General', commands: ['ping', 'avatar', 'serverinfo(si)', 'userinfo(ui)', 'changenickname(sn)'] },
   { name: 'Welcome', commands: ['welcome', 'goodbye'] },
-  { name: 'Antinuke', commands: ['antinuke', 'lockdown'] },
+  { name: 'Antinuke', commands: ['antinuke', 'setup', 'backup', 'restore', 'key'] },
+  { name: 'extra', commands: ['githubuser (gitu)', 'setprefix(sp)', 'stats'] }
 ];
 
 module.exports = {
@@ -25,7 +26,7 @@ module.exports = {
         const embed = new EmbedBuilder()
           .setColor('Blurple')
           .setTitle(`${module.name} Commands`)
-          .setDescription(module.commands.join(', '))
+          .setDescription(`\`${module.commands.join(', ')}\``)
           .setFooter({ text: `Use ${prefix}help <module> for more details on a module!` });
 
         return message.channel.send({ embeds: [embed] });
