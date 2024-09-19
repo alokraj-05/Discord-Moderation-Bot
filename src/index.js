@@ -14,7 +14,7 @@ const {
 const fs = require("fs");
 const path = require("node:path");
 const mongoose = require("mongoose");
-const mentionResponse = require('./commands/prefix/mentionResponse');
+const mentionResponse = require("./commands/prefix/mentionResponse");
 const client = new Client({
   intents: [
     IntentsBitField.Flags.Guilds,
@@ -28,7 +28,6 @@ const client = new Client({
     GatewayIntentBits.MessageContent,
   ],
 });
-const BOT_OWNER_ID = process.env.BOT_OWNER_ID;
 
 const allCommands = require("./data/commands");
 client.commands = new Collection();
@@ -58,36 +57,37 @@ for (const file of eventFiles) {
     client.on(event.name, (...args) => event.execute(...args));
   }
 }
-client.on('messageCreate', async (message) => {
+client.on("messageCreate", async (message) => {
   // Call the mentionResponse module if the message mentions the bot
   await mentionResponse.execute(message, client);
 });
+
 // Help command
-function generateEmbed(page) {
-  const start = page * commandsPerPage;
-  const currentCommands = allCommands.slice(start, start + commandsPerPage);
+// function generateEmbed(page) {
+//   const start = page * commandsPerPage;
+//   const currentCommands = allCommands.slice(start, start + commandsPerPage);
 
-  const embed = new EmbedBuilder()
-    .setColor(0x0099ff)
-    .setTitle("Help")
-    .setDescription("List of all available commands")
-    .setTimestamp()
-    .setFooter({
-      text: `Page ${page + 1} of ${Math.ceil(
-        allCommands.length / commandsPerPage
-      )}`,
-    });
+//   const embed = new EmbedBuilder()
+//     .setColor(0x0099ff)
+//     .setTitle("Help")
+//     .setDescription("List of all available commands")
+//     .setTimestamp()
+//     .setFooter({
+//       text: `Page ${page + 1} of ${Math.ceil(
+//         allCommands.length / commandsPerPage
+//       )}`,
+//     });
 
-  currentCommands.forEach((command) => {
-    embed.addFields({
-      name: command.name,
-      value: command.description,
-      inline: true,
-    });
-  });
+//   currentCommands.forEach((command) => {
+//     embed.addFields({
+//       name: command.name,
+//       value: command.description,
+//       inline: true,
+//     });
+//   });
 
-  return embed;
-}
+//   return embed;
+// }
 
 // client.on("interactionCreate", async (interaction) => {
 //   if (!interaction.isChatInputCommand() && !interaction.isButton()) return;
@@ -142,17 +142,167 @@ function generateEmbed(page) {
 // });
 
 // Other commands
-client.on("messageCreate", (message) => {
-  if (message.author.bot) return;
 
-  if (message.content === "nashe") {
-    message.reply("KAR-LO");
+client.on("guildMemberUpdate", async (oldMember, newMember) => {
+  const adminLogChannel = newMember.guild.channels.cache.find(
+    (c) => c.name === "admin-log"
+  );
+  if (!adminLogChannel) return;
+  const adminLogEmbed = new EmbedBuilder()
+    .setTitle("Changes")
+    .setDescription(
+      `<@${newMember.user.tag}> has ${
+        newMember.permissions.has("ADMINISTRATOR") ? "gained" : "lost"
+      } administrator privileges.`
+    )
+    .setColor("Yellow")
+    .setTimestamp();
+  if (
+    oldMember.permissions.has(PermissionsBitField.Flags.Administrator) !==
+    newMember.permissions.has(PermissionsBitField.Flags.Administrator)
+  ) {
+    await adminLogChannel.send({ embeds: [adminLogEmbed] });
+  }
+});
+
+client.on("guildMemberAdd", async (member) => {
+  const welcomeChannel = member.guild.channels.cache.find(
+    (c) => c.name === "welcome-log"
+  );
+  const newMemberEmbed = new EmbedBuilder()
+    .setTitle("Welcome")
+    .setDescription(
+      `Hey <@${member.id}>, welcome to **${member.guild.name}**! Please read the rules.`
+    )
+    .setColor("Blurple")
+    .setTimestamp();
+  if (welcomeChannel) {
+    await welcomeChannel.send({ embeds: [newMemberEmbed] });
+  }
+});
+
+async function alert(channel, message) {
+  const alertEmbed = new EmbedBuilder()
+    .setTitle(`<:17927warning:1284208753339793408> Alert!`)
+    .setColor("Red")
+    .setTimestamp()
+    .setDescription(message);
+
+  await channel.send({ embeds: [alertEmbed] });
+}
+
+client.on("guildBanAdd", async (ban) => {
+  const alertChannel = ban.guild.channels.cache.find((c) => c.name === "alert");
+  if (alertChannel) {
+    await alert(
+      alertChannel,
+      `<:3514miok:1284964043786027131> Suspicious activity detected: **${ban.user.tag}** was banned.`
+    );
+  }
+});
+client.on("channelDelete", async (ban) => {
+  const alertChannel = ban.guild.channels.cache.find((c) => c.name === "alert");
+
+  if (!alertChannel) return;
+
+  await alert(
+    alertChannel,
+    `<:3514miok:1284964043786027131> Channel delete activity detected **{channel.name}** ID\`${channel.id}\` was deleted. `
+  );
+});
+
+client.on("roleDelete", async (role) => {
+  const alertChannel = role.guild.channels.cache.find(
+    (c) => c.name === "alert"
+  );
+  if (!alertChannel) return;
+
+  await alert(
+    alertChannel,
+    `<:3514miok:1284964043786027131> Role delete activity detected **${role.name}** ID\`${role.id}\` was deleted.`
+  );
+});
+
+client.on("roleCreate", async (role) => {
+  const alertChannel = role.guild.channels.cache.find(
+    (c) => c.name === "alert"
+  );
+  if (!alertChannel) return;
+
+  await alert(
+    alertChannel,
+    `<:3514miok:1284964043786027131> Role create \`${role.name}\` ID \`${role.id}\`.`
+  );
+});
+
+client.on("roleUpdate", async (oldRole, newRole) => {
+  const alertChannel = newRole.guild.channels.cache.find(
+    (c) => c.name === "alert"
+  );
+  if (!alertChannel) return;
+  if (oldRole.permissions.bitfield !== newRole.permissions.bitfield) {
+    await alert(
+      alertChannel,
+      `<:3514miok:1284964043786027131> Role **${newRole.name}** (ID: ${newRole.id}) had its permissions changed.`
+    );
+  }
+  if (oldRole.name !== newRole.name) {
+    await alert(
+      alertChannel,
+      `<:3514miok:1284964043786027131> Role name changed from **${oldRole.name}** to **${newRole.name}** (ID: ${newRole.id}).`
+    );
+  }
+});
+
+client.on("guildMemberUpdate", async (oldMember, newMember) => {
+  const alertChannel = newMember.guild.channels.cache.find(
+    (c) => c.name === "alert"
+  );
+  if (!alertChannel) return;
+  if (oldMember.roles.bitfield !== newMember.roles.cache.size) {
+    await alert(
+      alertChannel,
+      `<:3514miok:1284964043786027131> Role update **${newMember.user.tag}** ID: \`${newMember.id}\` had their roles updated.`
+    );
+  }
+  if (
+    oldMember.permissions.has("Administrator") !==
+    newMember.permissions.has("Administrator")
+  ) {
+    await alert(
+      alertChannel,
+      `<:3514miok:1284964043786027131> **${newMember.user.tag}** has ${
+        newMember.permissions.has("Administrator") ? "gained" : "lost"
+      } administator privileges.`
+    );
+  }
+});
+
+client.on("guildMemberRemove", async (member) => {
+  const auditLogs = await member.guild.fetchAuditLogs({
+    type: "MEMBER_KICK",
+    limit: 1,
+  });
+  const kickLog = auditLogs.entries.first();
+
+  const alertChannel = member.guild.channels.cache.find(
+    (c) => c.name === "alert"
+  );
+  if (!alertChannel) return;
+
+  if (kickLog && kickLog.target.id === member.id) {
+    await alert(
+      alertChannel,
+      `<:3514miok:1284964043786027131> Suspicious activity detected: **${member.user.tag}** (ID: ${member.id}) was kicked by **${kickLog.executor.tag}**.`
+    );
   }
 });
 
 // welcome message
 
 const GuildSettings = require("../src/models/guildSettings");
+const { channel } = require("diagnostics_channel");
+const { permission } = require("process");
 
 client.on("guildMemberAdd", async (member) => {
   const guildId = member.guild.id;
@@ -179,7 +329,7 @@ client.on("guildMemberAdd", async (member) => {
       .setTitle("Welcome!")
       .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
       .setDescription(
-        `Hello **__${member.user.username}__** , a.k.a **${member}**!
+        `Hello **__${member.user.username}__** , a.k.a **<@${member.id}>**!
       
     Welcome to **${member.guild.name}**! We're glad to have you here. 😊
 
@@ -196,125 +346,8 @@ client.on("guildMemberAdd", async (member) => {
   }
 });
 
-client.on("interactionCreate", (interaction) => {
-  if (interaction.commandName === "aboutsergio") {
-    const embed = new EmbedBuilder()
-      .setTitle("Sergio")
-      .setColor("Blue")
-      .setDescription(
-        "SERGIO is here to make server management effortless and efficient, allowing you to focus on what truly matters – building a thriving community. Get ready to experience the next level of Discord moderation with SERGIO!"
-      )
-      .setAuthor({
-        name: "Exodus",
-        iconURL:
-          "https://cdn.discordapp.com/attachments/1250377756370534432/1269354972991197306/ExodusLogo.png?ex=66afc271&is=66ae70f1&hm=1632c1ffb0d28c89787b7915123145aadfc2d5057697fb78180f3fbefaa8bf1d&",
-        url: "https://discord.com/users/1161611783891587122",
-      })
-      .addFields(
-        { name: "Key Features", value: "Key features include:" },
-        { name: "\u200B", value: "\u200B" },
-        {
-          name: "Automated Moderation",
-          value:
-            "Instantly handle spam, inappropriate content, and disruptive behavior.",
-          inline: true,
-        },
-        {
-          name: "Customizable Commands",
-          value:
-            "Tailor SERGIO’s functionality to fit your server’s unique needs.",
-          inline: true,
-        }
-      )
-      .addFields(
-        {
-          name: "Role Management",
-          value:
-            "Easily assign and manage roles to keep your community organized.",
-          inline: true,
-        },
-        {
-          name: "Audit Logging",
-          value: "Keep track of all moderation actions with detailed logs.",
-          inline: true,
-        },
-        {
-          name: "User-Friendly Interface",
-          value: "Simple and intuitive controls for both admins and users.",
-          inline: true,
-        }
-      )
-      .setImage(
-        "https://cdn.discordapp.com/attachments/1250377756370534432/1269558043322880040/Black_Simple_Geometric_Discord_Profile_Banner.png?ex=66b07f90&is=66af2e10&hm=faf176d238a3e9a58513e9551c5482a92a04dec4e252096432b5184647c53772&"
-      )
-      .setTimestamp()
-      .setFooter({ text: "Requested at" })
-      .setThumbnail(
-        "https://cdn.discordapp.com/attachments/1250377756370534432/1269354972668104747/sergioLogo.jpeg?ex=66afc270&is=66ae70f0&hm=dd8dc2e0530ad18109b79e5a73b2005b44a0b411dc772385a5dca34561e42d00&"
-      );
-    interaction.reply({ embeds: [embed] });
-  }
-});
-client.on("messageCreate", (message) => {
-  if (message.author.bot) return;
-
-  if (message.content === "aboutSergio" || message.content === "sergio") {
-    const embed = new EmbedBuilder()
-      .setTitle("Sergio")
-      .setColor("Blue")
-      .setDescription(
-        "SERGIO is here to make server management effortless and efficient, allowing you to focus on what truly matters – building a thriving community. Get ready to experience the next level of Discord moderation with SERGIO!"
-      )
-      .setAuthor({
-        name: "Exodus",
-        iconURL:
-          "https://cdn.discordapp.com/attachments/1250377756370534432/1269354972991197306/ExodusLogo.png?ex=66afc271&is=66ae70f1&hm=1632c1ffb0d28c89787b7915123145aadfc2d5057697fb78180f3fbefaa8bf1d&",
-        url: "https://discord.com/users/1161611783891587122",
-      })
-      .addFields(
-        { name: "Key Features", value: "Key features include:" },
-        { name: "\u200B", value: "\u200B" },
-        {
-          name: "Automated Moderation",
-          value:
-            "Instantly handle spam, inappropriate content, and disruptive behavior.",
-          inline: true,
-        },
-        {
-          name: "Customizable Commands",
-          value:
-            "Tailor SERGIO’s functionality to fit your server’s unique needs.",
-          inline: true,
-        }
-      )
-      .addFields(
-        {
-          name: "Role Management",
-          value:
-            "Easily assign and manage roles to keep your community organized.",
-          inline: true,
-        },
-        {
-          name: "Audit Logging",
-          value: "Keep track of all moderation actions with detailed logs.",
-          inline: true,
-        },
-        {
-          name: "User-Friendly Interface",
-          value: "Simple and intuitive controls for both admins and users.",
-          inline: true,
-        }
-      )
-      .setImage(
-        "https://cdn.discordapp.com/attachments/1250377756370534432/1269558043322880040/Black_Simple_Geometric_Discord_Profile_Banner.png?ex=66b07f90&is=66af2e10&hm=faf176d238a3e9a58513e9551c5482a92a04dec4e252096432b5184647c53772&"
-      )
-      .setTimestamp()
-      .setFooter({ text: "Requested at" })
-      .setThumbnail(
-        "https://cdn.discordapp.com/attachments/1250377756370534432/1269354972668104747/sergioLogo.jpeg?ex=66afc270&is=66ae70f0&hm=dd8dc2e0530ad18109b79e5a73b2005b44a0b411dc772385a5dca34561e42d00&"
-      );
-    message.channel.send({ embeds: [embed] });
-  }
+client.on("error", (error) => {
+  console.error("Discord client error:", error);
 });
 
 mongoose.connect(process.env.MONGODB_URI).then(() => {
