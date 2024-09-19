@@ -50,13 +50,13 @@ module.exports = {
       });
     }
 
-    if (!member.manageable) {
-      return interaction.reply({
-        content:
-          "I cannot change the nickname of this member. They might have higher roles than me or have administrator permissions.",
-        ephemeral: true,
-      });
-    }
+    // if (!member.manageable) {
+    //   return interaction.reply({
+    //     content:
+    //       "I cannot change the nickname of this member. They might have higher roles than me or have administrator permissions.",
+    //     ephemeral: true,
+    //   });
+    // }
 
     try {
       await member.setNickname(
