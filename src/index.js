@@ -26,6 +26,8 @@ const client = new Client({
     GatewayIntentBits.GuildPresences,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
+    GatewayIntentBits.AutoModerationConfiguration,
+    GatewayIntentBits.AutoModerationExecution,
   ],
 });
 
@@ -43,7 +45,6 @@ client.on("ready", () => {
 const commandsPerPage = 7;
 require("./handlers/prefixCommandHandler")(client);
 require("./handlers/slashCommandHandler")(client);
-
 const eventsPath = path.join(__dirname, "events");
 const eventFiles = fs
   .readdirSync(eventsPath)
@@ -151,8 +152,10 @@ client.on("guildMemberUpdate", async (oldMember, newMember) => {
   const adminLogEmbed = new EmbedBuilder()
     .setTitle("Changes")
     .setDescription(
-      `<@${newMember.user.tag}> has ${
-        newMember.permissions.has("ADMINISTRATOR") ? "gained" : "lost"
+      `<@${newMember.id}> has ${
+        newMember.permissions.has(PermissionsBitField.Flags.Administrator)
+          ? "gained"
+          : "lost"
       } administrator privileges.`
     )
     .setColor("Yellow")
@@ -280,7 +283,7 @@ client.on("guildMemberUpdate", async (oldMember, newMember) => {
 
 client.on("guildMemberRemove", async (member) => {
   const auditLogs = await member.guild.fetchAuditLogs({
-    type: "MEMBER_KICK",
+    type: 20,
     limit: 1,
   });
   const kickLog = auditLogs.entries.first();
