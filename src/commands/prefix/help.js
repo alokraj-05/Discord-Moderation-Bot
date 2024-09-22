@@ -5,11 +5,13 @@ const {
   ButtonStyle,
 } = require("discord.js");
 const { getPrefix } = require("../../prefix/getPrefix"); // Fetching prefix from DB
+const { description } = require("./embed");
 
 // Sample command modules (you can adjust this as needed)
 const modules = [
   {
     name: "Moderation",
+    description: "You can use moderation commands either with prefix or slash.",
     commands: [
       "ban",
       "kick",
@@ -18,11 +20,11 @@ const modules = [
       "unban(ub)",
       "lock",
       "unlock",
-      "automod",
     ],
   },
   {
     name: "General",
+    description: "General commands for basic info.",
     commands: [
       "ping",
       "avatar",
@@ -33,15 +35,38 @@ const modules = [
   },
   {
     name: "Welcome",
+    description: "Customize your server for better interaction.",
     commands: ["welcome", "goodbye", "joinroles", "reactionroles"],
   },
   {
     name: "Antinuke",
+    description:
+      "Make your server safe with antinuke (use backup to keep your server data stored and restore it when anything wrong happens) {key backing up if there are more changes we don't use auto backup}",
     commands: ["antinuke", "setup", "backup", "restore", "key"],
   },
   {
     name: "extra",
-    commands: ["githubuser (gitu)", "setprefix(sp)", "stats", "embed", "purge"],
+    description: "For fun purposes.",
+    commands: [
+      "githubuser (gitu)",
+      "setprefix(sp)",
+      "stats",
+      "embed",
+      "purge",
+      "pfp",
+    ],
+  },
+  {
+    name: "automod",
+    description: "Make your server safe with automod.",
+    commands: [
+      "flagged-words",
+      "spam-messages",
+      "mention-spam",
+      "keywords",
+      "block-links",
+      "rate-limit",
+    ],
   },
 ];
 
@@ -63,10 +88,13 @@ module.exports = {
         const embed = new EmbedBuilder()
           .setColor("Blurple")
           .setTitle(`${module.name} Commands`)
-          .setDescription(`\`${module.commands.join(", ")}\``)
+          .setDescription(
+            `${module.description}\n\`${module.commands.join(", ")}\``
+          )
           .setFooter({
-            text: `Use ${prefix}help <module> for more details on a module!`,
-          });
+            text: `Go through docs for more details.`,
+          })
+          .setThumbnail(client.user.displayAvatarURL({ dynamic: true }));
 
         return message.channel.send({ embeds: [embed] });
       } else {
