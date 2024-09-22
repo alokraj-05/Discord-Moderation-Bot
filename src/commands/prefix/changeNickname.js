@@ -13,10 +13,7 @@ module.exports = {
       return message.reply("Please mention a user and provide a new nickname.");
 
     const executor = message.member;
-    if (
-      !executor.permissions.has(PermissionsBitField.Flags.Administrator) ||
-      !executor.permissions.has(PermissionsBitField.Flags.ChangeNickname)
-    ) {
+    if (!executor.permissions.has(PermissionsBitField.Flags.ChangeNickname)) {
       return message.reply(
         "You don't have permission to set nickname for a member."
       );
