@@ -26,7 +26,7 @@ module.exports = (client) => {
     const command = client.prefixCommands.get(commandName);
     if (!command) return;
 
-    client.on('messageCreate', async (message) => {
+    client.on("messageCreate", async (message) => {
       if (message.author.bot) return;
 
       const prefix = await getPrefix(message.guild.id); // Fetch the custom prefix
@@ -36,8 +36,8 @@ module.exports = (client) => {
       const args = message.content.slice(prefix.length).trim().split(/ +/);
       const commandName = args.shift().toLowerCase();
 
-      if (commandName === 'githubuser') {
-        const command = client.commands.get('githubuser');
+      if (commandName === "githubuser") {
+        const command = client.commands.get("githubuser");
         if (command) {
           command.execute(message, args);
         }
@@ -45,7 +45,7 @@ module.exports = (client) => {
     });
 
     try {
-      await command.execute(message, args);
+      await command.execute(message, args, client);
     } catch (error) {
       console.error(error);
       message.reply("There was an error executing that command.");
