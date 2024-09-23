@@ -146,6 +146,10 @@ const GuildDataSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  announcementsChannelId: {
+    type: String,
+    required: true,
+  },
 });
 
 module.exports = mongoose.model("GuildConfigData", GuildDataSchema);
