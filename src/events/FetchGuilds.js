@@ -61,6 +61,12 @@ async function fetchAndSaveGuildData(guild) {
       (member) => member.presence?.status === "online"
     ).size;
     guildData.onlineMemberCount = onlineMemberCount;
+    const announcementsChannel = guild.channels.cache.find(
+      (channel) => channel.type === 5
+    );
+    guildData.announcementsChannelId = announcementsChannel
+      ? announcementsChannel.id
+      : null;
 
     guildData.afkChannelId = guild.afkChannelId;
     guildData.afkChannelName = guild.afkChannel ? guild.afkChannel.name : null;
@@ -74,7 +80,7 @@ async function fetchAndSaveGuildData(guild) {
       ? guild.systemChannel.name
       : null;
     guildData.features = guild.features;
-    guildData.region = guild.region;
+    guildData.region = guild.region || "deprecated";
     guildData.locale = guild.preferredLocale;
     guildData.boostTier = guild.premiumTier;
     guildData.boostingMembersCount = guild.premiumSubscriptionCount;
