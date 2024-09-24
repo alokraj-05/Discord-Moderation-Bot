@@ -43,6 +43,9 @@ client.on("ready", () => {
 });
 
 const commandsPerPage = 7;
+require("./handlers/stealHandler")(client);
+require("./handlers/announceCommandHandler")(client);
+require("./handlers/purgeCommandHandler")(client);
 require("./handlers/prefixCommandHandler")(client);
 require("./handlers/slashCommandHandler")(client);
 const eventsPath = path.join(__dirname, "events");
@@ -265,7 +268,7 @@ client.on("guildMemberUpdate", async (oldMember, newMember) => {
   if (oldMember.roles.bitfield !== newMember.roles.cache.size) {
     await alert(
       alertChannel,
-      `<:3514miok:1284964043786027131> Role update **${newMember.user.tag}** ID: \`${newMember.id}\` had their roles updated.`
+      `<:3514miok:1284964043786027131> Member update **${newMember.user.tag}** ID: \`${newMember.id}\`\nNickname \`${newMember.nickname}\``
     );
   }
   if (
@@ -300,16 +303,26 @@ client.on("guildMemberRemove", async (member) => {
     );
   }
 });
+// client.on('messageDeleteBulk', async (member)=> {
+
+// })
 
 // welcome message
 
 const GuildSettings = require("../src/models/guildSettings");
 const { channel } = require("diagnostics_channel");
 const { permission } = require("process");
+const joinRole = require("./models/joinRoles");
 
+client.on("guildMemberAdd", async (newMember) => {
+  const dbjoinRole = await joinRole.findOne({ guildId: newMember.guild.id });
+  if (dbjoinRole) {
+    const role = newMember.guild.roles.cache.get(dbjoinRole.roleId);
+    if (role) newMember.roles.add(role);
+  }
+});
 client.on("guildMemberAdd", async (member) => {
   const guildId = member.guild.id;
-
   try {
     const settings = await GuildSettings.findOne({ guildId });
 
