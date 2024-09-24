@@ -41,7 +41,7 @@ const modules = [
   {
     name: "Antinuke",
     description:
-      "Make your server safe with antinuke (use backup to keep your server data stored and restore it when anything wrong happens) {key backing up if there are more changes we don't use auto backup}",
+      "**SLASH COMMAND**\nMake your server safe with antinuke (use backup to keep your server data stored and restore it when anything wrong happens) {keep backing up if there are more changes we don't use auto backup}",
     commands: ["antinuke", "setup", "backup", "restore", "key"],
   },
   {
@@ -58,7 +58,7 @@ const modules = [
   },
   {
     name: "automod",
-    description: "Make your server safe with automod.",
+    description: "Make your server safe with automod. (Slash command)",
     commands: [
       "flagged-words",
       "spam-messages",
@@ -89,7 +89,7 @@ module.exports = {
           .setColor("Blurple")
           .setTitle(`${module.name} Commands`)
           .setDescription(
-            `${module.description}\n\`${module.commands.join(", ")}\``
+            `> ${module.description}\n\`${module.commands.join(", ")}\``
           )
           .setFooter({
             text: `Go through docs for more details.`,
