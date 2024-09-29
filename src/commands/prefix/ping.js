@@ -14,8 +14,15 @@ module.exports = {
       .setColor("#0099ff")
       .setTitle("🏓 Pong")
       .addFields(
-        { name: "`Your ping is`", value: `\`${userPing}\`ms` },
-        { name: "`API Ping`", value: `\`${apiPing}ms\`` }
+        {
+          name: "**Your ping is**",
+          value: `\`\`\`${userPing}ms\`\`\``,
+          inline: true,
+        },
+        {
+          name: "**API Ping**",
+          value: `\`\`\`${apiPing}ms\`\`\``,
+        }
       );
     sentMessage.edit({ content: null, embeds: [embed] });
   },
