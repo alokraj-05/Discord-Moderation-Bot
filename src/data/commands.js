@@ -22,6 +22,10 @@ const commands = [
     name: "`/user`",
     description: "Get information about user",
   },
+  {
+    name: "`/setwelcomechannel`",
+    description: "configure a channel to get join logs",
+  },
 ];
 
 module.exports = commands;
