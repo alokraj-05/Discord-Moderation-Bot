@@ -18,6 +18,13 @@ const AfkSchema = new mongoose.Schema({
     type: "Date",
     required: true,
   },
+  mentions: [
+    {
+      messageContent: String,
+      mentionedBy: String,
+      timestamp: Date,
+    },
+  ],
 });
 
 module.exports = mongoose.model("AfkModal", AfkSchema);
