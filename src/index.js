@@ -48,6 +48,8 @@ require("./handlers/announceCommandHandler")(client);
 require("./handlers/purgeCommandHandler")(client);
 require("./handlers/prefixCommandHandler")(client);
 require("./handlers/slashCommandHandler")(client);
+const messageInteractionHandler = require("./handlers/messageInteractionHandler");
+messageInteractionHandler(client);
 const eventsPath = path.join(__dirname, "events");
 const eventFiles = fs
   .readdirSync(eventsPath)
