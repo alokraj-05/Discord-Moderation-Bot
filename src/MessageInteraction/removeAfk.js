@@ -41,6 +41,17 @@ module.exports = {
           );
         }, 30 * 1000);
       }
+      function formateTime(ms) {
+        const second = Math.floor(ms / 1000);
+        const minute = Math.floor(second / 60);
+        const hour = Math.floor(minute / 60);
+        const days = Math.floor(hour / 24);
+
+        if (days > 0) return `${days} day${days > 1 ? "s" : ""} ago`;
+        if (hour > 0) return `${hour} hour${days > 1 ? "s" : ""} ago`;
+        if (minute > 0) return `${minute} minute${minute > 1 ? "s" : ""} ago`;
+        return `${second} second${second > 1 ? "s" : ""} ago`;
+      }
       const afkusername = message.author.displayName;
       if (message.author.bot) return;
 
@@ -68,8 +79,11 @@ module.exports = {
 
         const username = mentionedUser.username;
         if (afkUser) {
-          const afkSince = new Date(afkUser.afkTimeStamp).toLocaleString();
           const afkreason = afkUser.AfkReason;
+          const afkTimeStamp = afkUser.afkTimeStamp;
+          const currentTime = Date.now();
+          const timeDifference = currentTime - afkTimeStamp;
+          const afkSince = formateTime(timeDifference);
           await MentionMsgEmbed(username, afkSince, afkreason);
 
           afkUser.mentions.push({
