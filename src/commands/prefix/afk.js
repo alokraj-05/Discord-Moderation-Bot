@@ -9,16 +9,16 @@ module.exports = {
     const username = message.author.displayName;
     const user = message.member.id;
 
-    async function successmsgEmbed(msg, timestamp) {
-      const afkSince = new Date(timestamp).toLocaleString();
+    async function successmsgEmbed(msg) {
+      const afkSince = new Date().toTimeString();
       const successEmbed = new EmbedBuilder()
-        .setTitle(`Afk set ${username}`)
+        .setTitle(`<:1137kissoctopus:1292732821055737867> Afk set ${username}`)
         .setDescription(
           `${
             msg != null
-              ? `Successfully created your afk with a reason | ${msg}`
-              : "Your afk is now set with any reason"
-          }\n Afk since: ${afkSince}`
+              ? `<a:32877animatedarrowbluelite:1284206601389215887> Successfully created your afk with a reason | ${msg}`
+              : "<a:32877animatedarrowbluelite:1284206601389215887> Your afk is now set with any reason"
+          }\n<:event_badge:1292734443852795945> Afk since: ${afkSince}`
         )
         .setColor("Blurple")
         .setTimestamp();
