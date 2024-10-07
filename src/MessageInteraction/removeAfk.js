@@ -9,7 +9,9 @@ module.exports = {
     client.on("messageCreate", async (message) => {
       async function RemovedAFKEmbed(msg, username) {
         const removeEmbed = new EmbedBuilder()
-          .setTitle(`Afk removed, Welcome back ${username}`)
+          .setTitle(
+            `<:93235smilingoctopus:1292732867381563404> Afk removed, Welcome back ${username}`
+          )
           .setDescription(msg)
           .setTimestamp()
           .setColor("Blue");
@@ -22,10 +24,14 @@ module.exports = {
             );
         }, 30 * 1000);
       }
-      async function MentionMsgEmbed(username, afkSince) {
+      async function MentionMsgEmbed(username, afkSince, reason) {
         const MentionEmbed = new EmbedBuilder()
-          .setTitle(`${username} is currently afk!`)
-          .setDescription(`They have been Afk since: \`${afkSince}\``)
+          .setTitle(
+            `<:1137kissoctopus:1292732821055737867> ${username} is currently afk!`
+          )
+          .setDescription(
+            `<:98683octopus:1292732890244972554> They have been Afk since: <:event_badge:1292734443852795945>\` ${afkSince} \`\n<a:73288animatedarrowred:1284206642816352386> reason: **${reason}**`
+          )
           .setColor("Red")
           .setTimestamp();
         const MentionMessage = await message.reply({ embeds: [MentionEmbed] });
@@ -47,7 +53,10 @@ module.exports = {
 
       if (existingAfkUser) {
         await AfkModal.findOneAndDelete({ _id: existingAfkUser._id });
-        await RemovedAFKEmbed(`Your Afk status has been removed.`, afkusername);
+        await RemovedAFKEmbed(
+          `<a:32877animatedarrowbluelite:1284206601389215887> Your Afk status has been removed.`,
+          afkusername
+        );
       }
       const mentionedUsers = message.mentions.users;
 
@@ -60,8 +69,8 @@ module.exports = {
         const username = mentionedUser.username;
         if (afkUser) {
           const afkSince = new Date(afkUser.afkTimeStamp).toLocaleString();
-
-          await MentionMsgEmbed(username, afkSince);
+          const afkreason = afkUser.AfkReason;
+          await MentionMsgEmbed(username, afkSince, afkreason);
 
           afkUser.mentions.push({
             messageContent: message.content,
