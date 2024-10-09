@@ -314,15 +314,7 @@ client.on("guildMemberRemove", async (member) => {
 const GuildSettings = require("../src/models/guildSettings");
 const { channel } = require("diagnostics_channel");
 const { permission } = require("process");
-const joinRole = require("./models/joinRoles");
 
-client.on("guildMemberAdd", async (newMember) => {
-  const dbjoinRole = await joinRole.findOne({ guildId: newMember.guild.id });
-  if (dbjoinRole) {
-    const role = newMember.guild.roles.cache.get(dbjoinRole.roleId);
-    if (role) newMember.roles.add(role);
-  }
-});
 client.on("guildMemberAdd", async (member) => {
   const guildId = member.guild.id;
   try {
