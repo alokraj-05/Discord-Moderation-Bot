@@ -5,32 +5,17 @@ const ReactionRoleSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  channelId: {
-    type: String,
-    required: true,
-  },
   messageId: {
     type: String,
     required: true,
   },
-  reactions: [
-    {
-      reactionId: {
-        type: String,
-        required: true,
-      },
-    },
-  ],
-  roles: [
-    {
-      roleid: {
-        type: String,
-        required: true,
-      },
-    },
-  ],
-  customMessage: {
+  reactions: {
     type: String,
+    required: true,
+  },
+  roles: {
+    type: String,
+    required: true,
   },
 });
 
