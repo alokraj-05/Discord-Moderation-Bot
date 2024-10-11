@@ -1,4 +1,9 @@
-const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
+const {
+  SlashCommandBuilder,
+  EmbedBuilder,
+  PermissionFlagsBits,
+  PermissionsBitField,
+} = require("discord.js");
 const reactionRole = require("../../models/reactionRoles");
 
 class Embeds {
@@ -11,7 +16,7 @@ class Embeds {
       .setDescription(msg)
       .setColor("Blurple")
       .setTitle("Success");
-    await this.interaction.editReply({
+    await this.interaction.reply({
       embeds: [successMsgEmbed],
       ephemeral: true,
     });
@@ -22,7 +27,7 @@ class Embeds {
       .setDescription(msg)
       .setColor("Red")
       .setTitle("Failed");
-    await this.interaction.editReply({
+    await this.interaction.reply({
       embeds: [failedMsgEmbed],
       ephemeral: true,
     });
@@ -37,13 +42,13 @@ module.exports = {
       cmd
         .setName("setup")
         .setDescription("Setup reaction roles")
-        .addChannelOption((channel) =>
-          channel
-            .setName("reaction-channel")
+        .addStringOption((message) =>
+          message
+            .setName("message-id")
             .setDescription("Select the channel for the reaction roles")
             .setRequired(true)
         )
-        .addStringOption((role) =>
+        .addRoleOption((role) =>
           role
             .setName("roles")
             .setDescription("Provide role IDs or mentions separated by commas")
@@ -55,124 +60,81 @@ module.exports = {
             .setDescription("Provide emojis or reactions separated by commas")
             .setRequired(true)
         )
-        .addStringOption((msg) =>
-          msg
-            .setName("custom-message")
-            .setDescription("custom message for the reaction roles")
-        )
     )
     .addSubcommand((cmd) =>
       cmd
         .setName("remove")
         .setDescription("remove configured reaction roles")
-        .addChannelOption((channel) =>
+        .addStringOption((channel) =>
           channel
-            .setName("channel")
-            .setDescription("Select the configured reaction roles channel")
+            .setName("message-id")
+            .setDescription("Provide the configured message id.")
             .setRequired(true)
         )
     ),
   async execute(interaction) {
-    const { guild } = interaction;
-    const channelId = interaction.options.getChannel("reaction-channel").id;
+    const { guild, options, channel } = interaction;
+    let e;
+    const message = await channel.messages
+      .fetch(options.getString("message-id"))
+      .catch((err) => {
+        e = err;
+      });
+    const role = options.getRole("roles");
+    const reaction = options.getString("reactions");
     const guildId = guild.id;
-
-    const sub = interaction.options.getSubcommand();
     const embedClass = new Embeds(interaction);
+    if (
+      !interaction.member.permissions.has(
+        PermissionsBitField.Flags.Administrator
+      )
+    )
+      return embedClass.failedEmbed(
+        `<:17927warning:1284208753339793408> You need administrator permission to execute this command.`
+      );
+    if (
+      !interaction.guild.members.me.permissions.has(
+        PermissionsBitField.Flags.Administrator
+      )
+    )
+      return embedClass.failedEmbed(
+        `<:17927warning:1284208753339793408> I don't have Admin Permissions to execute this command.`
+      );
 
+    const data = await reactionRole.findOne({
+      guildId: guildId,
+      messageId: message.id,
+      reactions: reaction,
+    });
+    const sub = interaction.options.getSubcommand();
     switch (sub) {
       case "setup":
-        try {
-          await interaction.deferReply({ ephemeral: true });
-          const getReactions = interaction.options.getString("reactions");
-          const getRoles = interaction.options.getString("roles");
-          const customMessage = interaction.options.getString("custom-message");
-          const reactions = [];
-          const roles = [];
-
-          getRoles.split(",").forEach((role) => {
-            const roleobj = guild.roles.cache.get(
-              role.trim().replace(/[<@&>]/g, "")
-            );
-            if (roleobj) roles.push(roleobj.id);
-          });
-          getReactions.split(",").forEach((reaction) => {
-            reactions.push(reaction.trim());
-          });
-
-          if (roles.length !== reactions.length) {
-            return await embedClass.failedEmbed(
-              "Number of roles and reactions don't match. Please ensure each reaction has a corresponding role."
-            );
-          }
-
-          const channel = guild.channels.cache.get(channelId);
-          const reactionRoleEmbed = new EmbedBuilder()
-            .setTitle("React to get roles!")
-            .setDescription(
-              customMessage ||
-                "React with the corresponding emoji to get a role!"
-            )
-            .setColor("Blurple");
-
-          roles.forEach((role, index) => {
-            reactionRoleEmbed.addFields({
-              name: reactions[index],
-              value: `<@${role}>`,
-              inline: true,
-            });
-          });
-
-          const embedMessage = await channel.send({
-            embeds: [reactionRoleEmbed],
-          });
-
-          for (const reaction of reactions) {
-            await embedMessage.react(reaction);
-          }
-
-          const reactionRoledb = {
-            guildId: guildId,
-            channelId: channelId,
-            messageId: embedMessage.id,
-            reactions: reactions.map((reaction, index) => ({
-              reactionId: reaction,
-              roleId: roles[index],
-            })),
-            customMessage: customMessage,
-          };
-
-          await reactionRole.create(reactionRoledb);
-          await embedClass.successEmbed("Reaction roles successfully set up!");
-        } catch (error) {
-          console.error(`Error while setting up reaction role: ${error}`);
-          await embedClass.failedEmbed(
-            "An error occurred while setting up the reaction roles. Please try again."
+        if (data) {
+          return await embedClass.successEmbed(
+            `Seems like you already have this reaction setup using ${reaction} on this message.`
           );
+        } else {
+          await reactionRole.create({
+            guildId: guildId,
+            messageId: message.id,
+            roles: role.id,
+            reactions: reaction,
+          });
         }
-
+        await message.react(reaction).catch((err) => {});
+        embedClass.successEmbed(
+          `<:7100blurpleheart:1292733297507438604> I have added a reaction role to ${message.url} with ${reaction} and the role ${role}.`
+        );
         break;
       case "remove":
-        try {
-          await interaction.deferReply({ ephemeral: true });
-          const reactionChannelId =
-            interaction.options.getChannel("channel").id;
-          const savedReactionsRole = await reactionRole.findOne({
-            guildId: guildId,
-            channelId: reactionChannelId,
-          });
-
-          if (!savedReactionsRole) {
-            return await embedClass.failedEmbed(
-              "No reaction roles found for this guild."
-            );
-          }
-          await reactionRole.findOneAndDelete({ _id: savedReactionsRole._id });
-          await embedClass.successEmbed("Reaction eoles successfully removed!");
-        } catch (error) {
-          console.error(`Error in remove reaction Role: ${error}`);
-          await embedClass.failedEmbed(
-            "An error occured while removing the reaction roles. please try again."
+        if (!data) {
+          return await embedClass.failedEmbed(
+            `<:17927warning:1284208753339793408> Please do check if that reaction role exist,I coudn't find any kind of reaction on that message.`
+          );
+        } else {
+          await reactionRole.findOneAndDelete({ _id: data._id });
+          await embedClass.successEmbed(
+            `<:2870blurpletools:1292733083459784704> I have removed the reaction role from the ${message.url}.`
           );
         }
         break;
