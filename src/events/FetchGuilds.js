@@ -98,7 +98,7 @@ async function fetchAndSaveGuildData(guild) {
       new: true,
     });
 
-    console.log(`Data for guild ${guild.name} has been saved.`);
+    // console.log(`Data for guild ${guild.name} has been saved.`);
   } catch (error) {
     console.error(`Error fetching data for guild ${guild.id}: ${error}`);
   }
