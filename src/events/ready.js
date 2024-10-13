@@ -15,10 +15,11 @@ module.exports = {
 
     const status = savedStatus ? savedStatus.status : "S!";
     const activityType = savedStatus ? savedStatus.activityType : 2;
+    const mode = savedStatus ? savedStatus.mode : "dnd";
 
     client.user.setPresence({
       activities: [{ name: `${status}`, type: activityType }], // type 2 sets it as "Listening to"
-      status: "online", // Optional: You can set the bot's status to 'online', 'idle', 'dnd', or 'invisible'
+      status: mode, // Optional: You can set the bot's status to 'online', 'idle', 'dnd', or 'invisible'
     });
     console.log(`Ready! Logged in as ${client.user.tag}`);
   },
