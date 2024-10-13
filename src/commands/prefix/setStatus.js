@@ -10,7 +10,8 @@ module.exports = {
       const botOwnerId = process.env.BOT_OWNER_ID;
       const memberId = message.author.id;
       const activityType = parseInt(args[0], 10);
-      const newStatus = args.slice(1).join(" ");
+      const mode = args[1];
+      const newStatus = args.slice(2).join(" ");
 
       const memberEmbed = new EmbedBuilder().setDescription(
         "Only bot's Owner is supposed to change the bot status."
@@ -35,13 +36,13 @@ module.exports = {
 
       await Status.findOneAndUpdate(
         {},
-        { status: newStatus, activityType: activityType },
+        { status: newStatus, activityType: activityType, mode: mode },
         { upsert: true }
       );
 
       message.client.user.setPresence({
         activities: [{ name: newStatus, type: activityType }],
-        status: "online",
+        status: mode,
       });
 
       const successEmbed = new EmbedBuilder()
