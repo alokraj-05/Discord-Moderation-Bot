@@ -1,80 +1,68 @@
+const { Events } = require("discord.js");
 const reactionRole = require("../models/reactionRoles");
 
 module.exports = {
   name: "reaction-role",
   description: "Add or remove reaction roles based on reactions",
   async execute(client) {
-    client.on("messageReactionAdd", async (reaction, user) => {
-      try {
-        // Fetching if the message or reaction is partial (not cached)
-        if (reaction.message.partial) await reaction.message.fetch();
-        if (reaction.partial) await reaction.fetch();
+    client.on("raw", async (packet) => {
+      // We only care about MESSAGE_REACTION_ADD and MESSAGE_REACTION_REMOVE events
+      if (
+        !["MESSAGE_REACTION_ADD", "MESSAGE_REACTION_REMOVE"].includes(packet.t)
+      )
+        return;
 
-        // Ignore bots
-        if (user.bot) return;
+      const { d: data } = packet;
+      const channel = await client.channels.fetch(data.channel_id);
 
-        const emoji = reaction.emoji;
-
-        // Logging the reaction info for debugging
-        if (emoji.id) {
-          console.log(`Custom emoji reacted: ${emoji.name} (ID: ${emoji.id})`);
-        } else {
-          console.log(`Standard emoji reacted: ${emoji.name}`);
-        }
-
-        // Fetch the reaction role data from the database
-        const data = await reactionRole.findOne({
-          guildId: reaction.message.guildId,
-          messageId: reaction.message.id,
-          reactions: emoji.id || emoji.name, // Support for both custom and standard emojis
-        });
-
-        if (!data) {
-          console.log("No reaction role found for this reaction.");
+      // Fetch the message (ensure partial fetching if not cached)
+      let message = channel.messages.cache.get(data.message_id);
+      if (!message) {
+        // Message not in cache, try to fetch it
+        try {
+          message = await channel.messages.fetch(data.message_id);
+        } catch (err) {
+          console.error(`Could not fetch the message: ${err}`);
           return;
         }
-
-        // Fetch the guild and the member
-        const guild = reaction.message.guild;
-        const member = await guild.members.fetch(user.id);
-
-        // Add the role
-        await member.roles.add(data.roles);
-        console.log(`Role added: ${data.roles} to user ${user.tag}`);
-      } catch (error) {
-        console.error("Error handling reaction add:", error);
       }
-    });
 
-    // Remove role when the reaction is removed (optional, if you want this feature)
-    client.on("messageReactionRemove", async (reaction, user) => {
-      try {
-        if (reaction.message.partial) await reaction.message.fetch();
-        if (reaction.partial) await reaction.fetch();
+      const emoji = data.emoji
+        ? `<a:${data.emoji.name}:${data.emoji.id}>`
+        : data.emoji.name;
 
-        if (user.bot) return;
+      // Ensure user is fetched
+      const user = await client.users.fetch(data.user_id).catch(console.error);
+      if (!user) return;
 
-        const emoji = reaction.emoji;
+      // Fetch reaction role data from database
+      const reactionData = await reactionRole.findOne({
+        guildId: message.guild.id,
+        messageId: message.id,
+        reactions: emoji,
+      });
 
-        const data = await reactionRole.findOne({
-          guildId: reaction.message.guildId,
-          messageId: reaction.message.id,
-          reactions: emoji.id || emoji.name,
-        });
+      if (!reactionData) return; // No reaction role set up for this reaction
 
-        if (!data) {
-          console.log("No reaction role found for this reaction removal.");
-          return;
-        }
+      // Fetch the guild member
+      const member = await message.guild.members
+        .fetch(user.id)
+        .catch(console.error);
+      if (!member) return;
 
-        const guild = reaction.message.guild;
-        const member = await guild.members.fetch(user.id);
-
-        // Remove the role
-        await member.roles.remove(data.roles);
-        console.log(`Role removed: ${data.roles} from user ${user.tag}`);
-      } catch (error) {
-        console.error("Error handling reaction remove:", error);
+      // Add or remove roles based on event type
+      if (packet.t === "MESSAGE_REACTION_ADD") {
+        // Add role to the user
+        await member.roles.add(reactionData.roles).catch(console.error);
+        console.log(
+          `Added role ${reactionData.roles} to ${member.user.tag} for reaction ${emoji}`
+        );
+      } else if (packet.t === "MESSAGE_REACTION_REMOVE") {
+        // Optionally remove the role when the reaction is removed
+        await member.roles.remove(reactionData.roles).catch(console.error);
+        console.log(
+          `Removed role ${reactionData.roles} from ${member.user.tag} for reaction ${emoji}`
+        );
       }
     });
   },
