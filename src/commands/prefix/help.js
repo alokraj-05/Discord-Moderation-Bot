@@ -3,6 +3,8 @@ const {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
+  StringSelectMenuBuilder,
+  StringSelectMenuOptionBuilder,
 } = require("discord.js");
 const { getPrefix } = require("../../prefix/getPrefix"); // Fetching prefix from DB
 const { description } = require("./embed");
@@ -27,7 +29,7 @@ const modules = [
     description: "General commands for basic info.",
     commands: [
       "ping",
-      "avatar",
+      "avatar(pfp)",
       "serverinfo(si)",
       "userinfo(ui)",
       "changenickname(sn)",
@@ -131,6 +133,16 @@ module.exports = {
       return embed;
     };
 
+    const row = new StringSelectMenuBuilder()
+      .setCustomId("dropdown")
+      .setPlaceholder("Select available commands!")
+      .addOptions(
+        new StringSelectMenuOptionBuilder()
+          .setLabel("Moderation")
+          .setEmoji("<:9961blurpleshieldfull:1292733201185247253>")
+          .setDescription("Get moderation commands")
+          .setValue(`moderation`)
+      );
     // Buttons for pagination and actions
     const buttons = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
