@@ -1,4 +1,5 @@
-﻿# Discord moderation bot ! <a> <img src="https://github.com/user-attachments/assets/061c843c-49c9-4e85-b86e-d5c570562c5f" width="50px" heigh="auto" style="border-radius:50%"> </a>
+﻿# Discord moderation bot ! <img src="https://github.com/user-attachments/assets/fcd57634-f475-41b5-a4e1-62df81524488" width="50px" heigh="auto" style="border-radius:50%">
+
 
 
 [![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
@@ -7,11 +8,12 @@
 
 # About
 
-[-] This is Sergio {The moderation bot}
+> This is Sergio {A moderation bot}
 
-[-] Easy to use with slash commands, prefix commands
+> Easy to use with slash commands, prefix commands
 
-- [ ] Make your server secure and handle all the raids spams.
+> Make your server secure and handle all the raids spams.
+
 > I am currently working on the raid and spam i will be updated soon.
 
 # Nearby Updates
@@ -19,7 +21,8 @@
 - [ ] Dashboard integration
 
 # latest updates
-
+- [x] Reaction Roles
+- [x] Join Roles
 - [x] [Sergio Docs](https://sergio-docs.vercel.app/) Official Docs for the bot
 
 - [x] Now you configure your **github** account with slash commands. **_Just with your github *username* and notification channel. {You can also set custom message}_** Due to github api rate limit per hour, we can only send req in an interval of 5 minutes (we can also send req per minute but if there are so many user then that will lead to bot ban from using the api.
@@ -54,40 +57,9 @@ cd Discord-Moderation-Bot
 **Install dependencies**
 
 ```bash
-npm install -y
+npm i
 ```
 
-```bash
-npm install discord.js
-```
-
-```bash
-npm install nodemon
-```
-
-```bash
-npm install dotenv
-```
-
-```bash
-npm install fs
-```
-
-```bash
-npm install mongoose
-```
-
-```bash
-npm install mongodb
-```
-
-```bash
-npm install rss-parser
-```
-
-```bash
-npm i axios
-```
 **LAST STEP**
 
 - Create a ".env" file in the main file (outside of src file)
