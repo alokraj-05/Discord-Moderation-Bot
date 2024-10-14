@@ -29,7 +29,9 @@ module.exports = {
 
       const emoji = data.emoji
         ? `<a:${data.emoji.name}:${data.emoji.id}>`
-        : data.emoji.name;
+        : // ? `<a:${data.emoji.name}:${data.emoji.id}`
+          // : `<:${data.emoji.name}:${data.emoji.id}`
+          data.emoji.name;
 
       // Ensure user is fetched
       const user = await client.users.fetch(data.user_id).catch(console.error);
