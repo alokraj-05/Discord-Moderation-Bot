@@ -26,13 +26,11 @@ module.exports = {
           return;
         }
       }
-
-      const emoji = data.emoji
-        ? `<a:${data.emoji.name}:${data.emoji.id}>`
-        : // ? `<a:${data.emoji.name}:${data.emoji.id}`
-          // : `<:${data.emoji.name}:${data.emoji.id}`
-          data.emoji.name;
-
+      const emoji = data.emoji.id
+        ? data.emoji.animated
+          ? `<a:${data.emoji.name}:${data.emoji.id}>`
+          : `<:${data.emoji.name}:${data.emoji.id}`
+        : data.emoji.name;
       // Ensure user is fetched
       const user = await client.users.fetch(data.user_id).catch(console.error);
       if (!user) return;
