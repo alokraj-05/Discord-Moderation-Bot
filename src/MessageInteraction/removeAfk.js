@@ -7,14 +7,12 @@ module.exports = {
 
   async execute(client) {
     client.on("messageCreate", async (message) => {
-      async function RemovedAFKEmbed(msg, username) {
+      async function RemovedAFKEmbed(username) {
         const removeEmbed = new EmbedBuilder()
-          .setTitle(
-            `<:93235smilingoctopus:1292732867381563404> Afk removed, Welcome back ${username}`
+          .setDescription(
+            `<a:51047animatedarrowwhite:1284206565334843427> Afk removed, Welcome back ${username}`
           )
-          .setDescription(msg)
-          .setTimestamp()
-          .setColor("Blue");
+          .setColor("#002540");
         const sentRemoveEmbed = await message.reply({ embeds: [removeEmbed] });
         setTimeout(() => {
           sentRemoveEmbed
@@ -26,14 +24,10 @@ module.exports = {
       }
       async function MentionMsgEmbed(username, afkSince, reason) {
         const MentionEmbed = new EmbedBuilder()
-          .setTitle(
-            `<:1137kissoctopus:1292732821055737867> ${username} is currently afk!`
-          )
           .setDescription(
-            `<:98683octopus:1292732890244972554> They have been Afk since: <:event_badge:1292734443852795945>\` ${afkSince} \`\n<a:73288animatedarrowred:1284206642816352386> reason: **${reason}**`
+            `<a:73288animatedarrowred:1284206642816352386> ${username} been Afk since: \`${afkSince}\` reason: ${reason}`
           )
-          .setColor("Red")
-          .setTimestamp();
+          .setColor("Red");
         const MentionMessage = await message.reply({ embeds: [MentionEmbed] });
         setTimeout(() => {
           MentionMessage.delete().catch((err) =>
@@ -64,10 +58,7 @@ module.exports = {
 
       if (existingAfkUser) {
         await AfkModal.findOneAndDelete({ _id: existingAfkUser._id });
-        await RemovedAFKEmbed(
-          `<a:32877animatedarrowbluelite:1284206601389215887> Your Afk status has been removed.`,
-          afkusername
-        );
+        await RemovedAFKEmbed(afkusername);
       }
       const mentionedUsers = message.mentions.users;
 
