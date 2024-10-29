@@ -12,17 +12,18 @@ module.exports = {
     async function successmsgEmbed(msg) {
       const afkSince = new Date().toTimeString();
       const successEmbed = new EmbedBuilder()
-        .setTitle(`<:1137kissoctopus:1292732821055737867> Afk set ${username}`)
         .setDescription(
           `${
             msg != null
-              ? `<a:32877animatedarrowbluelite:1284206601389215887> Successfully created your afk with a reason | ${msg}`
-              : "<a:32877animatedarrowbluelite:1284206601389215887> Your afk is now set with any reason"
-          }\n<:event_badge:1292734443852795945> Afk since: ${afkSince}`
+              ? `<a:32877animatedarrowbluelite:1284206601389215887> Afk set with reason: **${msg}**`
+              : `<a:32877animatedarrowbluelite:1284206601389215887> ${username} afk is now set without any reason`
+          }`
         )
-        .setColor("Blurple")
-        .setTimestamp();
-      await message.reply({ embeds: [successEmbed] });
+        .setColor("#002540");
+      const successmsgEmbed = await message.reply({ embeds: [successEmbed] });
+      setTimeout(() => {
+        successmsgEmbed.delete();
+      }, 10_000);
     }
 
     const guildId = message.guild.id;
