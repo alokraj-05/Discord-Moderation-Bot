@@ -7,7 +7,8 @@ const {
 } = require("discord.js");
 
 module.exports = {
-  name: "h",
+  name: "help",
+  aliases: ["Help", "H", "ch"],
   description: "Get a list of all available commands.",
   async execute(message) {
     const avatar = message.client.user.displayAvatarURL({ dynamic: true });
