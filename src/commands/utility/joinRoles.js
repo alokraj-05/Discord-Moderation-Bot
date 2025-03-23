@@ -46,7 +46,6 @@ module.exports = {
     const { options } = interaction;
     async function failedEmbed(msg) {
       const failedmsgEmbed = new EmbedBuilder()
-        .setTitle("Permission denied")
         .setDescription(msg)
         .setColor("Red");
 
@@ -60,7 +59,6 @@ module.exports = {
     }
     async function successEmbed(msg) {
       const successmsgEmbed = new EmbedBuilder()
-        .setTitle("Permission denied")
         .setDescription(msg)
         .setColor("Blurple");
 
