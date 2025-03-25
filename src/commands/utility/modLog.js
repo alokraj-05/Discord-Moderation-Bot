@@ -25,6 +25,8 @@ const createModLog = async (interaction) => {
       `You don't have enough perms to run this command\nRequired permissions: \`Administrator\``
     );
   }
+
+  await alert.successAlert(`Successfully created Sergio mod log`);
   try {
     const modCategory = await guild.channels.create({
       name: "Sergio-ModLog",
@@ -190,6 +192,7 @@ module.exports = {
               { name: "enable", value: "enable" },
               { name: "disable", value: "disable" }
             )
+            .setRequired(true)
         )
     ),
   async execute(interaction) {
