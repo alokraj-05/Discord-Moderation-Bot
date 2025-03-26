@@ -140,7 +140,9 @@ async function removeModLog(interaction) {
   const alert = new Alert(interaction);
 
   if (
-    !interaction.members.me.permissions.has(PermissionFlagsBits.Administrator)
+    !interaction.guild.members.me.permissions.has(
+      PermissionFlagsBits.Administrator
+    )
   ) {
     return alert.errorAlertWithTitle(
       `I don't have admin perms to remove Sergio-ModLog`,
@@ -152,6 +154,7 @@ async function removeModLog(interaction) {
     return alert.errorAlert(`You don't have admin perms to setup mod log.`);
   }
 
+  await alert.errorAlert(`Deleting Sergio mod log`);
   try {
     const searchCategory = interaction.guild.channels.cache.find(
       (channel) => channel.name === "Sergio-ModLog" && channel.type === 4
@@ -167,7 +170,6 @@ async function removeModLog(interaction) {
       await channel.delete();
     }
     await searchCategory.delete();
-    return alert.successAlert(`Sergio Mod log removed successfully.`);
   } catch (error) {
     console.error(error);
     return alert.errorAlert(
@@ -181,30 +183,23 @@ module.exports = {
     .setName("modlog")
     .setDescription("Setup mod log for the server.")
     .addSubcommand((cmd) =>
-      cmd
-        .setName("action")
-        .setDescription("Enable or Disable mod log for the server")
-        .addStringOption((opt) =>
-          opt
-            .setName("options")
-            .setDescription("Choose either enable or disable")
-            .addChoices(
-              { name: "enable", value: "enable" },
-              { name: "disable", value: "disable" }
-            )
-            .setRequired(true)
-        )
+      cmd.setName("enable").setDescription("Enable Mod log for the server")
+    )
+    .addSubcommand((cmd) =>
+      cmd.setName("disable").setDescription("Disable Mod log for the server")
     ),
   async execute(interaction) {
+    const alert = new Alert(interaction);
     const sub = interaction.options.getSubcommand();
-    const option = interaction.options.getString("options");
+    const option = interaction.options.getString("action");
+
     switch (sub) {
-      case "action":
-        if (option == "enable") {
-          return await createModLog(interaction);
-        } else if (option == "disable") {
-          return await removeModLog(interaction);
-        }
+      case "enable":
+        return await createModLog(interaction);
+      case "disable":
+        return await removeModLog(interaction);
+      default:
+        return alert.errorAlert(`Invalid interaction.`);
     }
   },
 };
