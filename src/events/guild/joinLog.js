@@ -9,7 +9,7 @@ module.exports = {
     );
     if (welcomeChannel) {
       const channelAlert = new ChannelAlert(welcomeChannel);
-      channelAlert.send(
+      channelAlert.successAlert(
         `<@${member.id}>, just joined **${member.guild.name}**!`
       );
     }
