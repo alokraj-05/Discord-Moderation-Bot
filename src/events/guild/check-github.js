@@ -1,5 +1,5 @@
 const axios = require("axios");
-const githubNotification = require("../models/githubNotifications");
+const githubNotification = require("../../models/githubNotifications");
 const { EmbedBuilder } = require("discord.js");
 require("dotenv").config();
 console.log("check-github.js module loaded");

@@ -1,5 +1,5 @@
 const Parser = require("rss-parser");
-const NotificationConfig = require("../models/notificationConfig");
+const NotificationConfig = require("../../models/notificationConfig");
 
 const parser = new Parser();
 

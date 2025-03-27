@@ -1,6 +1,6 @@
 const { Events } = require("discord.js");
-const { getPrefix } = require("../prefix/getPrefix");
-const Status = require("../models/status");
+const { getPrefix } = require("../../prefix/getPrefix");
+const Status = require("../../models/status");
 
 module.exports = {
   name: Events.ClientReady,

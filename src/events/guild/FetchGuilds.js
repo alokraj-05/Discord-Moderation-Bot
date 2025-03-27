@@ -1,4 +1,4 @@
-const GuildConfigData = require("../models/fetchGuild");
+const GuildConfigData = require("../../models/fetchGuild");
 
 module.exports = {
   name: "ready",
