@@ -128,6 +128,21 @@ const createModLog = async (interaction) => {
         },
       ],
     });
+    await guild.channels.create({
+      name: "message-delete",
+      parent: modCategory.id,
+      type: ChannelType.GuildText,
+      permissionOverwrites: [
+        {
+          id: guild.roles.everyone.id,
+          deny: [PermissionsBitField.Flags.ViewChannel],
+        },
+        {
+          id: interaction.user.id,
+          allow: [PermissionsBitField.Flags.ViewChannel],
+        },
+      ],
+    });
   } catch (error) {
     console.error(error);
     await alert.errorAlert(
