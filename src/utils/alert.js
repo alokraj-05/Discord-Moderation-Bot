@@ -16,6 +16,18 @@ class Alert {
       sendEmbed.delete();
     }, 10000);
   }
+  async deferErrorAlert(message) {
+    const alertEmbed = new EmbedBuilder()
+      .setDescription(message)
+      .setColor("Red");
+    const sendEmbed = await this.interaction.deferReply({
+      embeds: [alertEmbed],
+      ephemeral: true,
+    });
+    setTimeout(() => {
+      sendEmbed.delete();
+    }, 10000);
+  }
   async errorAlertWithTitle(message, errTitle) {
     const alertEmbed = new EmbedBuilder()
       .setTitle(errTitle)
