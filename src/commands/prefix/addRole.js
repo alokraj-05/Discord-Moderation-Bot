@@ -48,7 +48,7 @@ module.exports = {
     }
     try {
       member.roles.add(role);
-      await alert.successAlert(`Role ${role} added to ${member}`);
+      await alert.successAlertNoDel(`Role ${role} added to ${member}`);
     } catch (error) {
       await alert.errorAlert(`something went wrong while adding role.`);
     }
