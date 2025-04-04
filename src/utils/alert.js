@@ -54,6 +54,15 @@ class Alert {
       sendEmbed.delete();
     }, 10000);
   }
+  async successAlertNoDel(message) {
+    const alertEmbed = new EmbedBuilder()
+      .setDescription(message)
+      .setColor("Blurple");
+    await this.interaction.reply({
+      embeds: [alertEmbed],
+      ephemeral: true,
+    });
+  }
   async successAlertWithTitle(message, successTitle) {
     const alertEmbed = new EmbedBuilder()
       .setTitle(successTitle)
