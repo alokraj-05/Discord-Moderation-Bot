@@ -1,4 +1,5 @@
 const Alert = require("../../utils/alert");
+const { PermissionsBitField, PermissionFlagsBits } = require("discord.js");
 module.exports = {
   name: "rrole",
   description: "add role to a user",
@@ -15,7 +16,7 @@ module.exports = {
       );
     }
     const executor = message.member;
-    if (!executor.permissions.has(PermissionsBitField.Flags.ChangeNickname)) {
+    if (!executor.permissions.has(PermissionsBitField.Flags.ManageRoles)) {
       return alert.errorAlert(
         `You don't have \`manage roles\` permission add or remove roles from a user.`
       );
