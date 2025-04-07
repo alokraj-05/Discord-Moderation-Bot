@@ -11,6 +11,7 @@ const {
   Collection,
   Events,
 } = require("discord.js");
+
 const fs = require("fs");
 const path = require("node:path");
 const mongoose = require("mongoose");
@@ -30,13 +31,14 @@ const client = new Client({
     GatewayIntentBits.AutoModerationConfiguration,
     GatewayIntentBits.AutoModerationExecution,
     GatewayIntentBits.GuildMessageReactions,
+    GatewayIntentBits.GuildVoiceStates,
   ],
 });
 
 const allCommands = require("./data/commands");
 client.commands = new Collection();
 client.cooldowns = new Collection();
-const initializeGitHubCheck = require("./events/check-github");
+const initializeGitHubCheck = require("./events/guild/check-github");
 
 // After your client is ready (usually in a 'ready' event handler):
 client.on("ready", () => {
@@ -50,6 +52,7 @@ require("./handlers/announceCommandHandler")(client);
 require("./handlers/purgeCommandHandler")(client);
 require("./handlers/prefixCommandHandler")(client);
 require("./handlers/slashCommandHandler")(client);
+require("./handlers/eventHandler")(client);
 const messageInteractionHandler = require("./handlers/messageInteractionHandler");
 messageInteractionHandler(client);
 const eventsPath = path.join(__dirname, "events");
@@ -69,85 +72,6 @@ client.on("messageCreate", async (message) => {
   // Call the mentionResponse module if the message mentions the bot
   await mentionResponse.execute(message, client);
 });
-
-// Help command
-// function generateEmbed(page) {
-//   const start = page * commandsPerPage;
-//   const currentCommands = allCommands.slice(start, start + commandsPerPage);
-
-//   const embed = new EmbedBuilder()
-//     .setColor(0x0099ff)
-//     .setTitle("Help")
-//     .setDescription("List of all available commands")
-//     .setTimestamp()
-//     .setFooter({
-//       text: `Page ${page + 1} of ${Math.ceil(
-//         allCommands.length / commandsPerPage
-//       )}`,
-//     });
-
-//   currentCommands.forEach((command) => {
-//     embed.addFields({
-//       name: command.name,
-//       value: command.description,
-//       inline: true,
-//     });
-//   });
-
-//   return embed;
-// }
-
-// client.on("interactionCreate", async (interaction) => {
-//   if (!interaction.isChatInputCommand() && !interaction.isButton()) return;
-
-//   if (interaction.isCommand() && interaction.commandName === "help") {
-//     const embed = generateEmbed(0);
-//     const row = new ActionRowBuilder().addComponents(
-//       new ButtonBuilder()
-//         .setCustomId("prev")
-//         .setLabel("⬅️")
-//         .setStyle(ButtonStyle.Primary)
-//         .setDisabled(true),
-//       new ButtonBuilder()
-//         .setCustomId("next")
-//         .setLabel("➡️")
-//         .setStyle(ButtonStyle.Primary)
-//         .setDisabled(allCommands.length <= commandsPerPage)
-//     );
-//     await interaction.reply({ embeds: [embed], components: [row] });
-//   } else if (interaction.isButton()) {
-//     const page =
-//       parseInt(
-//         interaction.message.embeds[0].footer.text.match(/Page (\d+) of/)[1],
-//         10
-//       ) - 1;
-
-//     let newPage;
-//     if (interaction.customId === "next") {
-//       newPage = page + 1;
-//     } else if (interaction.customId === "prev") {
-//       newPage = page - 1;
-//     }
-
-//     const embed = generateEmbed(newPage);
-//     const row = new ActionRowBuilder().addComponents(
-//       new ButtonBuilder()
-//         .setCustomId("prev")
-//         .setLabel("⬅️")
-//         .setStyle(ButtonStyle.Primary)
-//         .setDisabled(newPage === 0),
-//       new ButtonBuilder()
-//         .setCustomId("next")
-//         .setLabel("➡️")
-//         .setStyle(ButtonStyle.Primary)
-//         .setDisabled(
-//           newPage === Math.ceil(allCommands.length / commandsPerPage) - 1
-//         )
-//     );
-
-//     await interaction.update({ embeds: [embed], components: [row] });
-//   }
-// });
 
 // Other commands
 
@@ -180,10 +104,7 @@ client.on("guildMemberAdd", async (member) => {
     (c) => c.name === "welcome-log"
   );
   const newMemberEmbed = new EmbedBuilder()
-    .setTitle("Welcome")
-    .setDescription(
-      `Hey <@${member.id}>, welcome to **${member.guild.name}**! Please read the rules.`
-    )
+    .setDescription(`<@${member.id}>, just joined **${member.guild.name}**!`)
     .setColor("Blurple")
     .setTimestamp();
   if (welcomeChannel) {
@@ -193,7 +114,6 @@ client.on("guildMemberAdd", async (member) => {
 
 async function alert(channel, message) {
   const alertEmbed = new EmbedBuilder()
-    .setTitle(`<:17927warning:1284208753339793408> Alert!`)
     .setColor("Red")
     .setTimestamp()
     .setDescription(message);
@@ -201,23 +121,24 @@ async function alert(channel, message) {
   await channel.send({ embeds: [alertEmbed] });
 }
 
-client.on("guildBanAdd", async (ban) => {
+client.on("guildBanAdd", async (ban, message) => {
+  const executor = message.member;
   const alertChannel = ban.guild.channels.cache.find((c) => c.name === "alert");
   if (alertChannel) {
     await alert(
       alertChannel,
-      `<:3514miok:1284964043786027131> Suspicious activity detected: **${ban.user.tag}** was banned.`
+      `<:3514miok:1284964043786027131> User: **${ban.user.tag}** was banned by **${executor}`
     );
   }
 });
-client.on("channelDelete", async (ban) => {
-  const alertChannel = ban.guild.channels.cache.find((c) => c.name === "alert");
-
+client.on("channelDelete", async (channel) => {
+  const alertChannel = channel.guild.channels.cache.find(
+    (c) => c.name === "alert"
+  );
   if (!alertChannel) return;
-
   await alert(
     alertChannel,
-    `<:3514miok:1284964043786027131> Channel delete activity detected **{channel.name}** ID\`${channel.id}\` was deleted. `
+    `Channel delete activity detected **${channel.name}** ID\`${channel.id}\` was deleted. `
   );
 });
 
@@ -229,7 +150,7 @@ client.on("roleDelete", async (role) => {
 
   await alert(
     alertChannel,
-    `<:3514miok:1284964043786027131> Role delete activity detected **${role.name}** ID\`${role.id}\` was deleted.`
+    `Role delete activity detected **${role.name}** ID\`${role.id}\` was deleted.`
   );
 });
 
@@ -239,51 +160,58 @@ client.on("roleCreate", async (role) => {
   );
   if (!alertChannel) return;
 
-  await alert(
-    alertChannel,
-    `<:3514miok:1284964043786027131> Role create \`${role.name}\` ID \`${role.id}\`.`
-  );
+  await alert(alertChannel, `Role create \`${role.name}\` ID \`${role.id}\`.`);
 });
 
-client.on("roleUpdate", async (oldRole, newRole) => {
-  const alertChannel = newRole.guild.channels.cache.find(
-    (c) => c.name === "alert"
-  );
-  if (!alertChannel) return;
-  if (oldRole.permissions.bitfield !== newRole.permissions.bitfield) {
-    await alert(
-      alertChannel,
-      `<:3514miok:1284964043786027131> Role **${newRole.name}** (ID: ${newRole.id}) had its permissions changed.`
-    );
-  }
-  if (oldRole.name !== newRole.name) {
-    await alert(
-      alertChannel,
-      `<:3514miok:1284964043786027131> Role name changed from **${oldRole.name}** to **${newRole.name}** (ID: ${newRole.id}).`
-    );
-  }
-});
+// client.on("roleUpdate", async (oldRole, newRole) => {
+//   const alertChannel = newRole.guild.channels.cache.find(
+//     (c) => c.name === "alert"
+//   );
+//   if (!alertChannel) return;
+//   if (oldRole.permissions.bitfield !== newRole.permissions.bitfield) {
+//     await alert(
+//       alertChannel,
+//       `Role **${newRole.name}** (ID: ${newRole.id}) had its permissions changed.`
+//     );
+//   }
+//   if (oldRole.name !== newRole.name) {
+//     await alert(
+//       alertChannel,
+//       `Role name changed from **${oldRole.name}** to **${newRole.name}** (ID: ${newRole.id}).`
+//     );
+//   }
+// });
 
 client.on("guildMemberUpdate", async (oldMember, newMember) => {
   const alertChannel = newMember.guild.channels.cache.find(
     (c) => c.name === "alert"
   );
   if (!alertChannel) return;
-  if (oldMember.roles.bitfield !== newMember.roles.cache.size) {
+  const oldRoles = oldMember.roles.cache;
+  const newRoles = newMember.roles.cache;
+  const addedRoles = newRoles.filter((role) => !oldRoles.has(role.id));
+  const removedRoles = oldRoles.filter((role) => !newRoles.has(role.id));
+
+  if (addedRoles.size > 0) {
     await alert(
       alertChannel,
-      `<:3514miok:1284964043786027131> Member update **${newMember.user.tag}** ID: \`${newMember.id}\`\nNickname \`${newMember.nickname}\``
+      `Role added: ${addedRoles.map((role) => role.name).join(", ")} to **${
+        newMember.displayName
+      }**`
     );
   }
-  if (
-    oldMember.permissions.has("Administrator") !==
-    newMember.permissions.has("Administrator")
-  ) {
+  if (removedRoles.size > 0) {
     await alert(
       alertChannel,
-      `<:3514miok:1284964043786027131> **${newMember.user.tag}** has ${
-        newMember.permissions.has("Administrator") ? "gained" : "lost"
-      } administator privileges.`
+      `Role removed: ${removedRoles.map((role) => role.name).join(", ")} to **${
+        newMember.displayName
+      }**`
+    );
+  }
+  if (oldMember.nickname !== newMember.nickname) {
+    await alert(
+      alertChannel,
+      `Nickname changed from ${oldMember.nickname} to ${newMember.nickname}`
     );
   }
 });
