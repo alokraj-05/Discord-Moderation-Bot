@@ -14,6 +14,5 @@ module.exports = {
         `Message deleted\nChannel:<#${message.channel.id}>\nDeleted by: <@${message.member.id}>\nMessage: \`${message.content}\``
       );
     }
-    console.log(`No channel found named as "message-delete"`);
   },
 };
