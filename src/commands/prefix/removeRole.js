@@ -7,7 +7,7 @@ module.exports = {
   async execute(message, args) {
     const alert = new Alert(message);
     const roleName = args[0];
-    const roleId = roleName.split("&")[1].split(">")[0];
+
     if (
       !message.guild.members.me.permissions.has(PermissionFlagsBits.ManageRoles)
     ) {
@@ -26,7 +26,11 @@ module.exports = {
       return alert.errorAlert(`Provide role name or mention the role`);
     if (!args[1])
       return alert.errorAlert(`Provide mention a user or provide their ID.`);
-
+    let RoleId = "";
+    if (roleName.includes("&")) {
+      const roleId = roleName.split("&")[1].split(">")[0];
+      RoleId = roleId;
+    }
     const role =
       message.guild.roles.cache.find((role) => role.name === roleName) ||
       message.guild.roles.cache.get(roleId);
