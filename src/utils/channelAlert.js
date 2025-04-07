@@ -13,7 +13,7 @@ class ChannelAlert {
   async successAlert(message) {
     const embed = new EmbedBuilder()
       .setDescription(message)
-      .setColor("Blurple");
+      .setColor("#311c63");
     await this.channel.send({ embeds: [embed] });
   }
 }
