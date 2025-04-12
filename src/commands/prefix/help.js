@@ -294,6 +294,11 @@ module.exports = {
                 name: "**Reaction Roles**",
                 value: `-# Setup reaction role for the server.`,
                 inline: true,
+              },
+              {
+                name: "**admin**",
+                value: `-# Get user or role with admin perms.`,
+                inline: true,
               }
             )
             .setColor("#002540")
