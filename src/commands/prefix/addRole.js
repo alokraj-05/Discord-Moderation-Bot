@@ -41,7 +41,7 @@ module.exports = {
     }
     const member =
       message.mentions.members.first() ||
-      message.guild.members.cache.get(args[1]).catch(() => null);
+      message.guild.members.cache.get(args[1]);
 
     if (!member) {
       return message.reply("User not found");

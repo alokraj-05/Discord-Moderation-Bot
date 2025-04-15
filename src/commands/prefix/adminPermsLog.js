@@ -8,6 +8,7 @@ module.exports = {
     const alert = new Alert(message);
     const executor = message.member;
     const cmd = args[0];
+    const flag = args[1];
     const guild = message.guild;
     const prefix = await getPrefix(guild.id);
     if (!cmd)
@@ -24,17 +25,35 @@ module.exports = {
             !member.user.bot
           );
         });
-        adminPermsUser.forEach((user) => {
-          adminPermsUsers.push(user.user.username);
-        });
-        if (adminPermsUsers.length === 0) {
-          return alert.errorAlert(`No users with admin perms found.`);
+        if (flag && flag === "-b") {
+          const adminPermsBot = [];
+          const adminPermsUserBot = guild.members.cache.filter(
+            (bot) =>
+              bot.permissions.has(PermissionFlagsBits.Administrator) &&
+              bot.user.bot
+          );
+          adminPermsUserBot.forEach((bot) => adminPermsBot.push(bot.id));
+          return alert.successAlertNoDel(
+            `Bot with Admin perms\n${adminPermsBot.map((bot) => `<@${bot}>`)}`
+          );
+        } else if (flag && flag !== "-b") {
+          return alert.errorAlertWithTitle(
+            `Use\n\`\`\`${prefix}admin u -b\`\`\`\nLogs all the bot with admin perms`,
+            `Invalid Flag`
+          );
+        } else {
+          adminPermsUser.forEach((user) => {
+            adminPermsUsers.push(user.user.username);
+          });
+          if (adminPermsUsers.length === 0) {
+            return alert.errorAlert(`No users with admin perms found.`);
+          }
+          return await alert.successAlertNoDel(
+            `Total users: ${
+              adminPermsUsers.length
+            }\nUser names: ${adminPermsUsers.join(", ")}`
+          );
         }
-        return await alert.successAlertNoDel(
-          `Total users: ${
-            adminPermsUsers.length
-          }\nUser names: ${adminPermsUsers.join(", ")}`
-        );
       }
       case "role":
       case "r": {

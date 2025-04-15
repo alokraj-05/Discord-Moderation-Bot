@@ -70,7 +70,7 @@ module.exports = {
 
         const roleIds = message.mentions.roles.map((role) => role.id);
         if (roleIds.length === 0)
-          return failedEmbed(`ou must mention valid roles.`);
+          return failedEmbed(`you must mention valid roles.`);
 
         existingGuild.roleId = [
           ...new Set([...(existingGuild.roleId || []), ...roleIds]),
