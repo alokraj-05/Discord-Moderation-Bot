@@ -4,15 +4,11 @@ const {
   EmbedBuilder,
 } = require("discord.js");
 module.exports = {
-  name: "sp",
+  name: "prefix",
   description: "Set a custom prefix for the server",
   async execute(message, args) {
     const executor = message.member;
-    if (
-      !executor.permissions.has(PermissionsBitField.Flags.Administrator) ||
-      !executor.permissions.has(PermissionsBitField.Flags.ManageChannels) ||
-      !executor.permissions.has(PermissionsBitField.Flags.ManageMessages)
-    ) {
+    if (!executor.permissions.has(PermissionsBitField.Flags.Administrator)) {
       const noPermsEmbed = new EmbedBuilder().setDescription(
         "<:17927warning:1284208753339793408> You do not have enough permissions to ban a member."
       );

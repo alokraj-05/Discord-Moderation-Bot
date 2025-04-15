@@ -5,10 +5,7 @@ module.exports = {
   description: "Unlock the guild",
   async execute(message) {
     const executor = message.member;
-    if (
-      !executor.permissions.has(PermissionsBitField.Flags.ManageChannels) ||
-      !executor.permissions.has(PermissionsBitField.Flags.Administrator)
-    ) {
+    if (!executor.permissions.has(PermissionsBitField.Flags.ManageChannels)) {
       const noPermsEmbed = new EmbedBuilder().setDescription(
         `You don't have enough perms to overwrite channels permissions, please ask any admin to make changes.`
       );
@@ -24,7 +21,7 @@ module.exports = {
       await message.channel.permissionOverwrites.set([
         {
           id: message.guild.roles.everyone,
-          allow: [PermissionsBitField.Flags.ViewChannel],
+          allow: [PermissionsBitField.Flags.SendMessages],
         },
       ]);
       await message.reply({ embeds: [embed] });

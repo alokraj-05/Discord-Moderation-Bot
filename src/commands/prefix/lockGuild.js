@@ -5,10 +5,7 @@ module.exports = {
   description: "Lock the channel",
   async execute(message) {
     const executor = message.member;
-    if (
-      !executor.permissions.has(PermissionsBitField.Flags.ManageChannels) ||
-      !executor.permissions.has(PermissionsBitField.Flags.Administrator)
-    ) {
+    if (!executor.permissions.has(PermissionsBitField.Flags.ManageChannels)) {
       const noPermsEmbed = new EmbedBuilder()
         .setDescription(
           `You don't have enough permissions to overwrite channels perms, please ask any higher ups.`
@@ -22,12 +19,12 @@ module.exports = {
         .setColor("Blurple")
         .setTitle("<:92143verified:1284208031214735415> locked")
         .setDescription(
-          `<:8227miheya:1284932288844660856> The channel ${message.channel} is now locked.\n perms changed: \`View channel\``
+          `<:8227miheya:1284932288844660856> The channel ${message.channel} is now locked.\n perms changed: \`Send message\``
         );
       await message.channel.permissionOverwrites.set([
         {
           id: message.guild.roles.everyone,
-          deny: [PermissionsBitField.Flags.ViewChannel],
+          deny: [PermissionsBitField.Flags.SendMessages],
         },
       ]);
       await message.reply({ embeds: [embed] });

@@ -10,9 +10,6 @@ module.exports = {
         "You don't have enough permissions to unban a memeber."
       );
       if (
-        !message.member.permissions.has(
-          PermissionsBitField.Flags.Administrator
-        ) ||
         !message.member.permissions.has(PermissionsBitField.Flags.BanMembers)
       ) {
         return message.reply({ embeds: [noPermsEmbed] });
