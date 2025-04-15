@@ -10,13 +10,15 @@ module.exports = {
       !message.mentions.has(client.user)
     )
       return;
+    botMention = message.mentions.users.has(client.user.id);
+    firstMention = message.mentions.members.first();
 
-    if (message.mentions.users.has(client.user.id)) {
+    if (firstMention && firstMention.id === client.user.id) {
       const prefix = await getPrefix(message.guild.id);
       const embed = new EmbedBuilder()
         .setColor("Blurple")
         .setDescription(
-          `<:3433mipinch:1284932155574714388> Please use my commands with \`${prefix}help\` or use /about to get about me || [documentation](https://sergio-docs.vercel.app/).`
+          `<:3433mipinch:1284932155574714388> Please use my commands with \`${prefix}help\` or use /about to get about me || [documentation](https://sergio-ten.vercel.app/).`
         )
         .setFooter({ text: `Prefix for this server: ${prefix}` });
       return message.reply({ embeds: [embed] });
