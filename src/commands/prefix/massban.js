@@ -8,7 +8,8 @@ const Alert = require("../../utils/alert");
 const { getPrefix } = require("../../prefix/getPrefix");
 module.exports = {
   name: "massban",
-  aliases: [],
+  aliases: ["mb"],
+  cooldown: 30,
   async execute(message, args) {
     const alert = new Alert(message);
     const prefix = await getPrefix(message.guild.id);
