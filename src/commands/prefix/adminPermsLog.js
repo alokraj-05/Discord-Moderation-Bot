@@ -4,6 +4,7 @@ const { getPrefix } = require("../../prefix/getPrefix");
 module.exports = {
   name: "admin",
   description: "log admin perms",
+  cooldown: 7,
   async execute(message, args) {
     const alert = new Alert(message);
     const executor = message.member;
