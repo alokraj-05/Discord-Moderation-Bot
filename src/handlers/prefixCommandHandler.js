@@ -11,39 +11,55 @@ module.exports = (client) => {
 
   for (const file of commandFiles) {
     const command = require(`../commands/prefix/${file}`);
+
     client.prefixCommands.set(command.name, command);
+    if (Array.isArray(command.aliases)) {
+      for (const alias of command.aliases) {
+        client.prefixCommands.set(alias, command);
+      }
+    }
   }
 
   client.on("messageCreate", async (message) => {
-    if (message.author.bot) return;
+    if (message.author.bot || !message.guild) return;
 
     const prefix = (await getPrefix(message.guild.id)) || "S!";
-    if (!message.content.startsWith(prefix)) return;
+    const mentionPrefix = `<@${client.user.id}>`;
+
+    let usedPrefix = null;
+
+    if (message.content.startsWith(prefix)) {
+      usedPrefix = prefix;
+    } else if (message.content.startsWith(mentionPrefix)) {
+      usedPrefix = mentionPrefix;
+    }
+
+    if (!usedPrefix) return;
 
     const args = message.content.slice(prefix.length).trim().split(/ +/);
     const commandName = args.shift().toLowerCase();
-
     const command = client.prefixCommands.get(commandName);
     if (!command) return;
 
-    client.on("messageCreate", async (message) => {
-      if (message.author.bot) return;
-
-      const prefix = await getPrefix(message.guild.id); // Fetch the custom prefix
-
-      if (!message.content.startsWith(prefix)) return;
-
-      const args = message.content.slice(prefix.length).trim().split(/ +/);
-      const commandName = args.shift().toLowerCase();
-
-      if (commandName === "githubuser") {
-        const command = client.commands.get("githubuser");
-        if (command) {
-          command.execute(message, args);
-        }
+    const { cooldowns } = client;
+    if (!cooldowns.has(command.name)) {
+      cooldowns.set(command.name, new Collection());
+    }
+    const now = Date.now();
+    const timestamps = cooldowns.get(command.name);
+    const cooldownsAmount = (command.cooldown ?? 3) * 1000;
+    if (timestamps.has(message.author.id)) {
+      const expirationTime =
+        timestamps.get(message.author.id) + cooldownsAmount;
+      if (now < expirationTime) {
+        const timeLeft = Math.round((expirationTime - now) / 1000);
+        return message.reply(`Wait dude, **${timeLeft}** more second(s) before 
+        reusing \`${command.name}\`.`);
       }
-    });
+    }
 
+    timestamps.set(message.author.id, now);
+    setTimeout(() => timestamps.delete(message.author.id), cooldownsAmount);
     try {
       await command.execute(message, args, client);
     } catch (error) {
