@@ -3,11 +3,15 @@ const { execute } = require("./inappropriateWords");
 
 module.exports = {
   name: "av",
+  aliases: ["avatar"],
+  cooldown: 8,
   description: "Get server avatar of user",
   async execute(message, args) {
     async function failedEmbed(msg) {
       const failedEmbedEmbed = new EmbedBuilder().setDescription(msg);
-      const failedEmbedMsg = await message.send({ embeds: [failedEmbedEmbed] });
+      const failedEmbedMsg = await message.channel.send({
+        embeds: [failedEmbedEmbed],
+      });
       setTimeout(() => {
         failedEmbedMsg.delete();
       }, 10_000);
