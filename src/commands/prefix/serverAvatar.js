@@ -4,7 +4,7 @@ const { execute } = require("./inappropriateWords");
 module.exports = {
   name: "av",
   aliases: ["avatar"],
-  cooldown: 8,
+  cooldown: 10,
   description: "Get server avatar of user",
   async execute(message, args) {
     async function failedEmbed(msg) {
