@@ -15,7 +15,6 @@ const {
 const fs = require("fs");
 const path = require("node:path");
 const mongoose = require("mongoose");
-const mentionResponse = require("./commands/prefix/mentionResponse");
 const client = new Client({
   intents: [
     IntentsBitField.Flags.Guilds,
@@ -68,10 +67,6 @@ for (const file of eventFiles) {
     client.on(event.name, (...args) => event.execute(...args));
   }
 }
-client.on("messageCreate", async (message) => {
-  // Call the mentionResponse module if the message mentions the bot
-  await mentionResponse.execute(message, client);
-});
 
 // Other commands
 
