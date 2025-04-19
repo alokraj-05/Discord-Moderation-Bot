@@ -2,8 +2,9 @@ const Alert = require("../../utils/alert");
 const { PermissionFlagsBits } = require("discord.js");
 module.exports = {
   name: "r",
+  aliases: ["role"],
   description: "add role to a user",
-
+  cooldown: 5,
   async execute(message, args) {
     const alert = new Alert(message);
     const roleName = args[0];
