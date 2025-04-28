@@ -1,11 +1,40 @@
-const mongoose = require('mongoose');
-
-const backupSchema = new mongoose.Schema({
-  guildId: { type: String, required: true },
-  backupKey: { type: String, required: true },
-  roles: [{ name: String, id: String }],
-  channels: [{ name: String, id: String }],
-  createdAt: { type: Date, default: Date.now }
+const mongoose = require("mongoose");
+const OverwriteSchema = new mongoose.Schema({
+  id: String,
+  allow: [String],
+  deny: [String],
+  type: String, // 'role' or 'member'
 });
 
-module.exports = mongoose.model('Backup', backupSchema);
+const ChannelSchema = new mongoose.Schema({
+  name: String,
+  type: Number,
+  position: Number,
+  userLimit: Number,
+  parent: String,
+  permissionOverwrites: [OverwriteSchema],
+});
+
+const CategorySchema = new mongoose.Schema({
+  name: String,
+  position: Number,
+  channels: [ChannelSchema],
+});
+
+const RoleSchema = new mongoose.Schema({
+  name: String,
+  color: String,
+  permissions: [String],
+  position: Number,
+  hoist: Boolean,
+  mentionable: Boolean,
+});
+
+const GuildBackupSchema = new mongoose.Schema({
+  guildId: String,
+  roles: [RoleSchema],
+  categories: [CategorySchema],
+  backupKey: String,
+});
+
+module.exports = mongoose.model("Backup", GuildBackupSchema);
