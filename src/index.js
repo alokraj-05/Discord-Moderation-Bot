@@ -5,11 +5,7 @@ const {
   EmbedBuilder,
   PermissionsBitField,
   GatewayIntentBits,
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
   Collection,
-  Events,
 } = require("discord.js");
 
 const fs = require("fs");
@@ -158,25 +154,6 @@ client.on("roleCreate", async (role) => {
   await alert(alertChannel, `Role create \`${role.name}\` ID \`${role.id}\`.`);
 });
 
-// client.on("roleUpdate", async (oldRole, newRole) => {
-//   const alertChannel = newRole.guild.channels.cache.find(
-//     (c) => c.name === "alert"
-//   );
-//   if (!alertChannel) return;
-//   if (oldRole.permissions.bitfield !== newRole.permissions.bitfield) {
-//     await alert(
-//       alertChannel,
-//       `Role **${newRole.name}** (ID: ${newRole.id}) had its permissions changed.`
-//     );
-//   }
-//   if (oldRole.name !== newRole.name) {
-//     await alert(
-//       alertChannel,
-//       `Role name changed from **${oldRole.name}** to **${newRole.name}** (ID: ${newRole.id}).`
-//     );
-//   }
-// });
-
 client.on("guildMemberUpdate", async (oldMember, newMember) => {
   const alertChannel = newMember.guild.channels.cache.find(
     (c) => c.name === "alert"
@@ -211,35 +188,9 @@ client.on("guildMemberUpdate", async (oldMember, newMember) => {
   }
 });
 
-client.on("guildMemberRemove", async (member) => {
-  const auditLogs = await member.guild.fetchAuditLogs({
-    type: 20,
-    limit: 1,
-  });
-  const kickLog = auditLogs.entries.first();
-
-  const alertChannel = member.guild.channels.cache.find(
-    (c) => c.name === "alert"
-  );
-  if (!alertChannel) return;
-
-  if (kickLog && kickLog.target.id === member.id) {
-    await alert(
-      alertChannel,
-      `<:3514miok:1284964043786027131> Suspicious activity detected: **${member.user.tag}** (ID: ${member.id}) was kicked by **${kickLog.executor.tag}**.`
-    );
-  }
-});
-// client.on('messageDeleteBulk', async (member)=> {
-
-// })
-
 // welcome message
 
 const GuildSettings = require("../src/models/guildSettings");
-const { channel } = require("diagnostics_channel");
-const { permission } = require("process");
-
 client.on("guildMemberAdd", async (member) => {
   const guildId = member.guild.id;
   try {
