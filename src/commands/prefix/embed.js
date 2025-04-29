@@ -11,39 +11,35 @@ module.exports = {
         .setColor("Red");
       await message.reply({ embeds: [failedmsgEmbed] });
     }
-    async function successEmbed(heading, title, msg, thumbnail) {
+
+    async function successEmbedDesc(msg) {
       const successmsgEmbed = new EmbedBuilder()
-        .setTitle(title)
         .setDescription(msg)
-        .setThumbnail(thumbnail)
         .setColor("Blurple");
       await message.channel.send({
-        content: `# ${heading}`,
         embeds: [successmsgEmbed],
       });
     }
+    async function successEmbedTitle(msg, title) {
+      const successmsgEmbed = new EmbedBuilder()
+        .setTitle(title)
+        .setDescription(msg)
+        .setColor("Blurple");
+      await message.channel.send({
+        embeds: [successmsgEmbed],
+      });
+    }
+
     const prefix = await getPrefix(message.guild.id);
     const msg = args.join(" ").split("|");
 
     if (!msg[0]) {
-      await failedEmbed(
-        `Please provide a message to be sent in embed.\nFormat: \`${prefix}embed Bold Message | embed title | description | thumbnail(link)\``
-      );
+      await failedEmbed(`Please provide a message to be sent in embed.`);
       return;
-    } else if (msg[0] && !msg[1]) {
-      await failedEmbed(
-        `Please provide the rest details in embed.\nFormat: \`| embed title | description | thumbnail(link)\``
-      );
-      return;
-    } else if (msg[0] && msg[1] && !msg[2]) {
-      await failedEmbed(
-        `Please provide the rest details in embed.\nFormat: \`| description | thumbnail(link)\``
-      );
-    } else if (msg[0] && msg[1] && msg[2] && !msg[3]) {
-      await failedEmbed(
-        `Please provide the rest details in embed.\nFormat: \`| thumbnail(link)\``
-      );
     }
-    await successEmbed(msg[0], msg[1], msg[2], msg[3]);
+    if (msg[0] && !msg[1]) {
+      return await successEmbedDesc(msg[0]);
+    }
+    await successEmbedTitle(msg[0], msg[1]);
   },
 };
