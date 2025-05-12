@@ -6,6 +6,7 @@ module.exports = {
   description: "Give configured role to the new joined user",
   async execute(client) {
     client.on("guildMemberAdd", async (member) => {
+      if (member.user.bot) return;
       const guildId = member.guild.id;
       if (!guildId) return;
 
