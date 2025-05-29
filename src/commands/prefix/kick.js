@@ -59,7 +59,7 @@ module.exports = {
         return failedEmbed(`No user found ;-; are u sure you ain't on weed ?`);
 
       if (
-        !message.guild.me.permissions.has(PermissionsBitField.Flags.KickMembers)
+        !message.guild.members.me.permissions.has(PermissionFlagsBits.KickMembers)
       ) {
         return failedEmbed(
           "Dude ykw, I also need perms to kick a member, and who told u to make changes in my default perms?"
