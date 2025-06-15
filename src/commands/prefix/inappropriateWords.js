@@ -9,6 +9,7 @@ module.exports = {
   name: "iw",
   description: "Set inappropriate words",
   async execute(message, args) {
+
     async function successEmbed(msg) {
       const successEmbedMsg = new EmbedBuilder()
         .setDescription(msg)
@@ -49,14 +50,16 @@ module.exports = {
         const isSetup = args[0]?.toLowerCase() === "true";
         if (!isSetup)
           return failedEmbed(`Use ".iw true <words>" for first-time setup.`);
-        const words = args.slice(1).join(" ");
+        const words = args.slice(1)
         if (!words) return failedEmbed(`Please provide words to add.`);
 
         const GuildDb = await inappropriateWords.create({
           guildId: guildId,
           enabled: true,
         });
-        GuildDb.words.push({ word: words });
+        words.forEach(element => {
+          GuildDb.words.push({ word: element });
+        })
         await GuildDb.save();
 
         return successEmbed(
@@ -107,7 +110,8 @@ module.exports = {
           );
         }
       }
-      const words = args.join(" ");
+      const words = args;
+      console.log(words)
       if (!words) return failedEmbed(`Please provide words to add.`);
 
       const existingWords = existingGuild.words;
@@ -117,7 +121,9 @@ module.exports = {
           `Word **${words}** already exists as an inappropriate word.`
         );
       }
-      existingGuild.words.push({ word: words });
+      words.forEach(element => {
+        existingGuild.words.push({word: element})
+      });
       await existingGuild.save();
       return successEmbed(`Added word **${words}** to inappropriate word.`);
     } catch (error) {
